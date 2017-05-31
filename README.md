@@ -63,8 +63,8 @@ End the loop block.
 ## EXAMPLE
 
 ### HOW TO WRITE?
-At the command prompt, type:<br/>
-`$ atat target=GAME`<br/>
+At the command prompt, type:`$ atat target=GAME`
+
 Since ATAT is waiting for input, it does as follows.
 <pre>
 sleep 3000
