@@ -14,11 +14,7 @@ namespace atat
         (atat::CreateEvent(NULL,TRUE,FALSE,NULL));
         if(abortedEvent_->handle()==NULL)
             throw runtime_error(describe
-            (
-                "function:'CreateEvent':failed(",
-                GetLastError(),
-                ")"
-            ));
+            ("function:'CreateEvent':failed(",GetLastError(),")"));
     }
 
     const HANDLE&Context::abortedEvent() {return abortedEvent_->handle();}
@@ -37,11 +33,7 @@ namespace atat
     {
         if(row_->tokens().size()-1!=2)
             throw runtime_error(describe
-            (
-                "row:'",
-                row_->description(),
-                "':wrong number of tokens"
-            ));
+            ("row:'",row_->description(),"':wrong number of tokens"));
         string key=row_->tokens().at(2);
         static map<string,WORD> keyMap(
         {
@@ -170,12 +162,7 @@ namespace atat
             {lower_case("SLEEP"),       0xDF},
         });
         if(keyMap.find(lower_case(key))==keyMap.end())
-            throw runtime_error(describe
-            (
-                "key:'",
-                key,
-                "':unknown"
-            ));
+            throw runtime_error(describe("key:'",key,"':unknown"));
         code_=keyMap.at(lower_case(key));
     }
 
@@ -189,11 +176,7 @@ namespace atat
         input.ki.dwExtraInfo=0;
         if(atat::SendInput(1,&input,sizeof(INPUT))!=1)
             throw runtime_error(describe
-            (
-                "function:'SendInput':failed(",
-                GetLastError(),
-                ")"
-            ));
+            ("function:'SendInput':failed(",GetLastError(),")"));
     }
 
     KeyDownCommand::KeyDownCommand(const shared_ptr<Row>&row_):
@@ -255,11 +238,7 @@ namespace atat
     {
         if(row_->tokens().size()!=3)
             throw runtime_error(describe
-            (
-                "row:'",
-                row_->description(),
-                "':wrong number of tokens"
-            ));
+            ("row:'",row_->description(),"':wrong number of tokens"));
         static map<string,DWORD> button_map(
         {
             {"left",  MOUSEEVENTF_LEFTDOWN},
@@ -323,11 +302,7 @@ namespace atat
         input.mi.dwExtraInfo=0;
         if(atat::SendInput(1,&input,sizeof(INPUT))!=1)
             throw runtime_error(describe
-            (
-                "function:'SendInput':failed(",
-                GetLastError(),
-                ")"
-            ));
+            ("function:'SendInput':failed(",GetLastError(),")"));
     }
 
     MouseMoveCommand::MouseMoveCommand(const shared_ptr<Row>&row_):
@@ -335,11 +310,7 @@ namespace atat
     {
         if(row_->tokens().size()!=4)
             throw runtime_error(describe
-            (
-                "row:'",
-                row_->description(),
-                "':wrong number of tokens"
-            ));
+            ("row:'",row_->description(),"':wrong number of tokens"));
         x_=atoi(row_->tokens().at(2).c_str());
         y_=atoi(row_->tokens().at(3).c_str());
     }
@@ -352,11 +323,7 @@ namespace atat
         {
             if(atat::GetWindowRect(find_target(),&targetRect)==FALSE)
                 throw runtime_error(describe
-                (
-                    "function:'GetWindowRect':failed(",
-                    GetLastError(),
-                    ")"
-                ));
+                ("function:'GetWindowRect':failed(",GetLastError(),")"));
         }
         int screenWidth=atat::GetSystemMetrics(SM_CXSCREEN);
         if(screenWidth==0)
@@ -377,11 +344,7 @@ namespace atat
     {
         if(row_->tokens().size()!=3)
             throw runtime_error(describe
-            (
-                "row:'",
-                row_->description(),
-                "':wrong number of tokens"
-            ));
+            ("row:'",row_->description(),"':wrong number of tokens"));
         amount_=atoi(row_->tokens().at(2).c_str());
     }
 
@@ -401,11 +364,7 @@ namespace atat
     {
         if(row_->tokens().size()-1>2)
             throw runtime_error(describe
-            (
-                "row:'",
-                row_->description(),
-                "':wrong number of tokens"
-            ));
+            ("row:'",row_->description(),"':wrong number of tokens"));
         if(row_->tokens().size()-1==2)
             number_=atoi(row_->tokens().at(2).c_str());
         else number_=0;
@@ -421,11 +380,7 @@ namespace atat
     {
         if(row_->tokens().size()-1!=1)
             throw runtime_error(describe
-            (
-                "row:'",
-                row_->description(),
-                "':wrong number of tokens"
-            ));
+            ("row:'",row_->description(),"':wrong number of tokens"));
     }
 
     void LoopEndCommand::execute()
@@ -447,11 +402,7 @@ namespace atat
     {
         if(row_->tokens().size()-1!=1)
             throw runtime_error(describe
-            (
-                "row:'",
-                row_->description(),
-                "':wrong number of tokens"
-            ));
+            ("row:'",row_->description(),"':wrong number of tokens"));
         time_=atoi(row_->tokens().at(1).c_str());
     }
 
@@ -482,17 +433,12 @@ namespace atat
     HWND find_target()
     {
         if(properties().find("target")==properties().end())
-            throw runtime_error(describe
-            ("property:'target':not found"));
+            throw runtime_error(describe("property:'target':not found"));
         HWND window=atat::FindWindowW
         (NULL,multi_to_wide(properties().at("target"),CP_UTF8).get());
         if(window==NULL)
             throw runtime_error(describe
-            (
-                "target:'",
-                properties().at("target"),
-                "':not found"
-            ));
+            ("target:'",properties().at("target"),"':not found"));
         return window;
     }
 
@@ -524,11 +470,7 @@ namespace atat
         );
         if(length==0)
             throw runtime_error(describe
-            (
-                "function:'MultiByteToWideChar':failed(",
-                GetLastError(),
-                ")"
-            ));
+            ("function:'MultiByteToWideChar':failed(",GetLastError(),")"));
         shared_ptr<wchar_t> utf16
         (new wchar_t[length],default_delete<wchar_t[]>());
         if
@@ -544,11 +486,7 @@ namespace atat
             )!=length
         )
             throw runtime_error(describe
-            (
-                "function:'MultiByteToWideChar':failed(",
-                GetLastError(),
-                ")"
-            ));
+            ("function:'MultiByteToWideChar':failed(",GetLastError(),")"));
         return utf16;
     }
 
@@ -565,19 +503,11 @@ namespace atat
         {
             if(row->tokens().size()<=index)
                 throw runtime_error(describe
-                (
-                    "row:'",
-                    row->description(),
-                    "':few switches"
-                ));
+                ("row:'",row->description(),"':few switches"));
             string switch_=lower_case(row->tokens().at(index));
             if(factories.find(switch_)==factories.end())
                 throw runtime_error(describe
-                (
-                    "switch:'",
-                    switch_,
-                    "':unknown"
-                ));
+                ("switch:'",switch_,"':unknown"));
             command=factories.at(switch_)(row);
         }
         return command;
@@ -912,11 +842,7 @@ namespace atat
         (Context::instance()->abortedEvent(),time);
         if(waitResult==WAIT_FAILED)
             throw runtime_error(describe
-            (
-                "function:'WaitForSingleObject':failed(",
-                GetLastError(),
-                ")"
-            ));
+            ("function:'WaitForSingleObject':failed(",GetLastError(),")"));
         if(waitResult==WAIT_OBJECT_0) throw aborted_exception();
     }
 

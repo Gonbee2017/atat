@@ -141,7 +141,10 @@ TEST(Context,construct)
         CHECK(c->properties().empty());
         CHECK_EQUAL(1,h.calls().size());
         CHECK_EQUAL
-        (call("CreateEvent",NULL,TRUE,FALSE,(LPCTSTR)NULL),h.calls().at(0));
+        (
+            call("CreateEvent",NULL,TRUE,FALSE,(LPCTSTR)NULL),
+            h.calls().at(0)
+        );
     });
 }
 
@@ -442,7 +445,8 @@ TEST(KeyDownCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -524,7 +528,11 @@ TEST(KeyPressCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
+        CHECK_EQUAL
+        (
+            call("WaitForSingleObject",(HANDLE)0x12,50),
+            h.calls().at(2)
+        );
         CHECK_EQUAL
         (
             call
@@ -539,7 +547,11 @@ TEST(KeyPressCommand,execute)
             h.calls().at(3)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(4));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(5));
+        CHECK_EQUAL
+        (
+            call("WaitForSingleObject",(HANDLE)0x12,100),
+            h.calls().at(5)
+        );
     });
 }
 
@@ -621,7 +633,8 @@ TEST(KeyUpCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -707,7 +720,8 @@ TEST(MouseButtonClickCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
         CHECK_EQUAL
         (
             call
@@ -724,7 +738,8 @@ TEST(MouseButtonClickCommand,execute)
             h.calls().at(3)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(4));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(5));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(5));
     });
 }
 
@@ -842,7 +857,8 @@ TEST(MouseButtonDoubleClickCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,25),h.calls().at(2));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,25),h.calls().at(2));
         CHECK_EQUAL
         (
             call
@@ -859,7 +875,8 @@ TEST(MouseButtonDoubleClickCommand,execute)
             h.calls().at(3)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(4));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(5));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(5));
         CHECK_EQUAL
         (
             call
@@ -876,7 +893,8 @@ TEST(MouseButtonDoubleClickCommand,execute)
             h.calls().at(6)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(7));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,75),h.calls().at(8));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,75),h.calls().at(8));
         CHECK_EQUAL
         (
             call
@@ -893,7 +911,8 @@ TEST(MouseButtonDoubleClickCommand,execute)
             h.calls().at(9)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(10));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(11));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(11));
     });
 }
 
@@ -979,7 +998,8 @@ TEST(MouseButtonDownCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -1065,7 +1085,8 @@ TEST(MouseButtonUpCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -1515,12 +1536,7 @@ TEST(MouseMoveCommand,execute)
         CHECK_EQUAL(5,h.calls().size());
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetWindowRect",(HWND)0x56),h.calls().at(1));
@@ -1618,12 +1634,7 @@ TEST(MouseMoveCommand,execute)
         CHECK_EQUAL(5,h.calls().size());
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetWindowRect",(HWND)0x56),h.calls().at(1));
@@ -2210,12 +2221,7 @@ TEST(free,find_target)
         CHECK_EQUAL(1,h.calls().size());
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(0)
         );
     });
@@ -2250,12 +2256,7 @@ TEST(free,find_target)
         CHECK_EQUAL(1,h.calls().size());
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(0)
         );
     });
@@ -2730,56 +2731,31 @@ TEST(free,run)
         );
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(1)
         );
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(2)
         );
         CHECK_EQUAL
         (call("WaitForSingleObject",(HANDLE)0x12,1000),h.calls().at(3));
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(4)
         );
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(5)
         );
         CHECK_EQUAL
         (call("WaitForSingleObject",(HANDLE)0x12,1000),h.calls().at(6));
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(7)
         );
     });
@@ -3072,12 +3048,7 @@ TEST(free,wait_active)
         CHECK_EQUAL(6,h.calls().size());
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetForegroundWindow"),h.calls().at(1));
@@ -3085,12 +3056,7 @@ TEST(free,wait_active)
         CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(3));
         CHECK_EQUAL
         (
-            call
-            (
-                "FindWindowW",
-                (const char*)NULL,
-                (const char*)L"電卓"
-            ),
+            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
             h.calls().at(4)
         );
         CHECK_EQUAL(call("GetForegroundWindow"),h.calls().at(5));
