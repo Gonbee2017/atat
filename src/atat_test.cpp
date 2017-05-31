@@ -2275,8 +2275,16 @@ TEST(free,multi_to_wide)
 {
     sand_box([] ()
     {
-        MEMCMP_EQUAL(L"いろは",multi_to_wide("いろは",CP_UTF8).get(),8);
-        MEMCMP_EQUAL(L"にほへと",multi_to_wide("にほへと",CP_UTF8).get(),10);
+        STRCMP_EQUAL
+        (
+            (const char*)L"いろは",
+            (const char*)multi_to_wide("いろは",CP_UTF8).get()
+        );
+        STRCMP_EQUAL
+        (
+            (const char*)L"にほへと",
+            (const char*)multi_to_wide("にほへと",CP_UTF8).get()
+        );
     });
 }
 
