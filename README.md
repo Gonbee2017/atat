@@ -88,7 +88,7 @@ If the GAME window becomes inactive halfway,
 execution will be paused.
 When it becomes active again, execution resumes.
 
-### REMARKS
+## REMARKS
 Script can contains comments, for example:
 <pre>
 # Script01 to earn experience.
