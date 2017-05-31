@@ -442,7 +442,7 @@ TEST(KeyDownCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(2));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -524,7 +524,7 @@ TEST(KeyPressCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(2));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
         CHECK_EQUAL
         (
             call
@@ -539,7 +539,7 @@ TEST(KeyPressCommand,execute)
             h.calls().at(3)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(4));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,200),h.calls().at(5));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(5));
     });
 }
 
@@ -621,7 +621,7 @@ TEST(KeyUpCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(2));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -707,7 +707,7 @@ TEST(MouseButtonClickCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(2));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
         CHECK_EQUAL
         (
             call
@@ -724,7 +724,7 @@ TEST(MouseButtonClickCommand,execute)
             h.calls().at(3)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(4));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,200),h.calls().at(5));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(5));
     });
 }
 
@@ -893,7 +893,7 @@ TEST(MouseButtonDoubleClickCommand,execute)
             h.calls().at(9)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(10));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,500),h.calls().at(11));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(11));
     });
 }
 
@@ -979,7 +979,7 @@ TEST(MouseButtonDownCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(2));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -1065,7 +1065,7 @@ TEST(MouseButtonUpCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(1));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(2));
+        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,50),h.calls().at(2));
     });
 }
 
@@ -2001,7 +2001,7 @@ TEST(SleepCommand,construct)
     });
     sand_box([] ()
     {
-        auto r=make_shared<Row>("sleep 3000 3000");
+        auto r=make_shared<Row>("sleep 1000 1000");
         try
         {
             auto sc=make_shared<SleepCommand>(r);
@@ -2009,12 +2009,12 @@ TEST(SleepCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("row:'sleep 3000 3000':wrong number of tokens",e.what());
+            ("row:'sleep 1000 1000':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto r=make_shared<Row>("sleep 3000");
+        auto r=make_shared<Row>("sleep 1000");
         auto sc=make_shared<SleepCommand>(r);
     });
 }
@@ -2046,13 +2046,13 @@ TEST(SleepCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto r=make_shared<Row>("sleep 3000");
+        auto r=make_shared<Row>("sleep 1000");
         auto sc=make_shared<SleepCommand>(r);
         sc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
         CHECK_EQUAL(1,h.calls().size());
         CHECK_EQUAL
-        (call("WaitForSingleObject",(HANDLE)0x12,3000),h.calls().at(0));
+        (call("WaitForSingleObject",(HANDLE)0x12,1000),h.calls().at(0));
     });
 }
 
@@ -2454,7 +2454,7 @@ TEST(free,parse_script)
             "mouse middle doubleclick\n"
             "loop begin 5\n"
             "loop end\n"
-            "sleep 3000\n"
+            "sleep 1000\n"
             " \n"
         );
         Context::instance()=make_shared<Context>();
@@ -2619,25 +2619,25 @@ TEST(free,run)
         static const char*argv[]={"test"};
         istringstream in
         (
-            "sleep 100\n"
-            "sleep 100\n"
+            "sleep 1000\n"
+            "sleep 2000\n"
         );
         ostringstream out,err;
         int result=atat::run(1,(char**)argv,in,out,err);
         CHECK_EQUAL(0,result);
         CHECK_EQUAL
         (
-            "sleep 100\n"
-            "sleep 100\n",
+            "sleep 1000\n"
+            "sleep 2000\n",
             out.str()
         );
         CHECK_EQUAL("",err.str());
         CHECK_EQUAL(1,Context::instance()->index());
         CHECK_EQUAL(2,h.calls().size());
         CHECK_EQUAL
-        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(0));
+        (call("WaitForSingleObject",(HANDLE)0x12,1000),h.calls().at(0));
         CHECK_EQUAL
-        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(1));
+        (call("WaitForSingleObject",(HANDLE)0x12,2000),h.calls().at(1));
     });
     sand_box([] ()
     {
@@ -2691,7 +2691,7 @@ TEST(free,run)
         istringstream in
         (
             "loop begin 2\n"
-            "sleep 100\n"
+            "sleep 1000\n"
             "loop end\n"
         );
         ostringstream out,err;
@@ -2700,9 +2700,9 @@ TEST(free,run)
         CHECK_EQUAL
         (
             "loop begin 2\n"
-            "sleep 100\n"
+            "sleep 1000\n"
             "loop end\n"
-            "sleep 100\n"
+            "sleep 1000\n"
             "loop end\n",
             out.str()
         );
@@ -2740,7 +2740,7 @@ TEST(free,run)
             h.calls().at(2)
         );
         CHECK_EQUAL
-        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(3));
+        (call("WaitForSingleObject",(HANDLE)0x12,1000),h.calls().at(3));
         CHECK_EQUAL
         (
             call
@@ -2762,7 +2762,7 @@ TEST(free,run)
             h.calls().at(5)
         );
         CHECK_EQUAL
-        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(6));
+        (call("WaitForSingleObject",(HANDLE)0x12,1000),h.calls().at(6));
         CHECK_EQUAL
         (
             call

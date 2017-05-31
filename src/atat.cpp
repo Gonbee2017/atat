@@ -202,7 +202,7 @@ namespace atat
     void KeyDownCommand::execute()
     {
         send(code_,0);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         Context::instance()->index()++;
     }
 
@@ -212,9 +212,9 @@ namespace atat
     void KeyPressCommand::execute()
     {
         send(code_,0);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         send(code_,KEYEVENTF_KEYUP);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         Context::instance()->index()++;
     }
 
@@ -223,7 +223,7 @@ namespace atat
     void KeyUpCommand::execute()
     {
         send(code_,KEYEVENTF_KEYUP);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         Context::instance()->index()++;
     }
 
@@ -244,9 +244,9 @@ namespace atat
     void MouseButtonClickCommand::execute()
     {
         send(0,0,0,button_);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         send(0,0,0,button_<<1);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         Context::instance()->index()++;
     }
 
@@ -281,7 +281,7 @@ namespace atat
         send(0,0,0,button_);
         wait(atat::GetDoubleClickTime()/4);
         send(0,0,0,button_<<1);
-        wait(atat::GetDoubleClickTime()*5/4);
+        wait(atat::GetDoubleClickTime()/4);
         Context::instance()->index()++;
     }
 
@@ -291,7 +291,7 @@ namespace atat
     void MouseButtonDownCommand::execute()
     {
         send(0,0,0,button_);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         Context::instance()->index()++;
     }
 
@@ -301,7 +301,7 @@ namespace atat
     void MouseButtonUpCommand::execute()
     {
         send(0,0,0,button_<<1);
-        wait(atat::GetDoubleClickTime());
+        wait(atat::GetDoubleClickTime()/2);
         Context::instance()->index()++;
     }
 
