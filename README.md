@@ -17,11 +17,11 @@ Specify a name, if it has a value, specify it following the equals.
 In the following list, a name is indicated in lowercase,
 and a value is indicated in uppercase.
 
-* help\n
+* help<br/>
 Show this document, and finish without doing anything.
-* silent\n
+* silent<br/>
 Don't show the commands to be executed.
-* target=<i>CAPTION</i>\n
+* target=<i>CAPTION</i><br/>
 *CAPTION* is the caption of the target window.
 Execute the command when this window is active.
 Also, specify the relative coordinates of this window
@@ -36,43 +36,43 @@ and parameters are indicated in uppercase.
 Also, if there are multiple choices on the switch,
 separate them with vertical bars.
 
-* key down|up|press *KEY*\n
+* key down|up|press *KEY*<br/>
 Down or up or both the key on the keyboard.
 *KEY* is the key to be operated.
 Specify a string following 'DIK_'.
-* mouse move *X* *Y*\n
+* mouse move *X* *Y*<br/>
 Move the mouse.
 *X* and *Y* are the coordinates to move the mouse.
 If target is specified, assumed to be its relative coordinates.
-* mouse wheel *AMOUNT*\n
+* mouse wheel *AMOUNT*<br/>
 Wheel the mouse.
 *AMOUNT* is the amount to wheel the mouse.
-* mouse left|right|middle down|up|click|doubleclick\n
+* mouse left|right|middle down|up|click|doubleclick<br/>
 Down or up or click or double click
 the left or right or middle button of the mouse.
-* sleep *TIME*\n
+* sleep *TIME*<br/>
 Do nothing for a while.
 *TIME* is time to wait in milliseconds.
-* loop begin [*NUMBER*]\n
+* loop begin [*NUMBER*]<br/>
 Begin the loop block.
 *NUMBER* is number of loops.
 If it's not specified, it's infinite.
-* loop end\n
+* loop end<br/>
 End the loop block.
 
 ## EXAMPLE
 
 ### HOW TO WRITE?
 At the command prompt, type:
->$ atat target=GAME
+'$ atat target=GAME'
 Since ATAT is waiting for input, it does as follows.
->sleep 3000
->mouse move 100 200
->mouse left click
->loop begin 5
->    key press A
->    key press B
->loop end
+    sleep 3000
+    mouse move 100 200
+    mouse left click
+    loop begin 5
+        key press A
+        key press B
+    loop end
 
 ### HOW IT WORKS?
 First, wait 3 seconds,
