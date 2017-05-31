@@ -778,7 +778,7 @@ namespace atat
 "    key down|up|press KEY\n"
 "        Down or up or both the key on the keyboard.\n"
 "        KEY is the key to be operated.\n"
-"        Specify a string following 'DIK_'.\n"
+"        Specify a string following 'DIK_' defined in DirectInput.\n"
 "    mouse move X Y\n"
 "        Move the mouse.\n"
 "        X and Y are the coordinates to move the mouse.\n"

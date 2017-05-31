@@ -40,7 +40,7 @@ separate them with vertical bars.
 * key down|up|press *KEY*<br/>
 Down or up or both the key on the keyboard.
 *KEY* is the key to be operated.
-Specify a string following 'DIK_'.
+Specify a string following 'DIK_' defined in DirectInput.
 * mouse move *X* *Y*<br/>
 Move the mouse.
 *X* and *Y* are the coordinates to move the mouse.
