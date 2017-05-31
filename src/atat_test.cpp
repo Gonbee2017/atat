@@ -2475,15 +2475,18 @@ TEST(free,parse_script)
         CHECK(dynamic_cast<MouseButtonDownCommand*>(cs.at(3).get()));
         CHECK(dynamic_cast<MouseButtonUpCommand*>(cs.at(4).get()));
         CHECK(dynamic_cast<MouseButtonClickCommand*>(cs.at(5).get()));
-        CHECK(dynamic_cast<MouseButtonDoubleClickCommand*>(cs.at(6).get()));
+        CHECK
+        (dynamic_cast<MouseButtonDoubleClickCommand*>(cs.at(6).get()));
         CHECK(dynamic_cast<MouseButtonDownCommand*>(cs.at(7).get()));
         CHECK(dynamic_cast<MouseButtonUpCommand*>(cs.at(8).get()));
         CHECK(dynamic_cast<MouseButtonClickCommand*>(cs.at(9).get()));
-        CHECK(dynamic_cast<MouseButtonDoubleClickCommand*>(cs.at(10).get()));
+        CHECK
+        (dynamic_cast<MouseButtonDoubleClickCommand*>(cs.at(10).get()));
         CHECK(dynamic_cast<MouseButtonDownCommand*>(cs.at(11).get()));
         CHECK(dynamic_cast<MouseButtonUpCommand*>(cs.at(12).get()));
         CHECK(dynamic_cast<MouseButtonClickCommand*>(cs.at(13).get()));
-        CHECK(dynamic_cast<MouseButtonDoubleClickCommand*>(cs.at(14).get()));
+        CHECK
+        (dynamic_cast<MouseButtonDoubleClickCommand*>(cs.at(14).get()));
         CHECK(dynamic_cast<LoopBeginCommand*>(cs.at(15).get()));
         CHECK(dynamic_cast<LoopEndCommand*>(cs.at(16).get()));
         CHECK(dynamic_cast<SleepCommand*>(cs.at(17).get()));
@@ -3053,7 +3056,8 @@ TEST(free,wait_active)
         );
         CHECK_EQUAL(call("GetForegroundWindow"),h.calls().at(1));
         CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(2));
-        CHECK_EQUAL(call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(3));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(3));
         CHECK_EQUAL
         (
             call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
