@@ -93,10 +93,13 @@ Script can contains comments, for example:
 <pre>
 # Script01 to earn experience.
 
+# Wait for ready.
+sleep 3000
+
 # Repeat infinitely.
 loop begin
     key press TAB # Target an enemy.
-    key press 1   # Attack an enemy.
+    key press 1   # Attack the target.
 loop end
 </pre>
 The string following the '#' is treated as a comment.
