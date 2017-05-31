@@ -247,9 +247,9 @@ namespace atat
     (const string&str,const UINT&codePage);
     shared_ptr<Command> new_command
     (
-        const map<string,COMMAND_FACTORY>&commandFactories,
+        const map<string,COMMAND_FACTORY>&factories,
         const shared_ptr<Row>&row,
-        const size_t&switchIndex
+        const size_t&index
     );
     map<string,string> parse_properties(int argc,char**argv);
     vector<shared_ptr<Command>> parse_script(istream&is);
