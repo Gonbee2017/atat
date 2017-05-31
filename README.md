@@ -4,7 +4,7 @@ usage:atat [*property*[=<i>VALUE</i>]...]
 
 ## WHAT IS ATAT?
 ATAT is an interpreter for automatically manipulating
-keyboard and mouse.
+keyboard and mouse on Windows.
 ATAT reads the script from standard input.
 The script is described as a list of commands.
 Basically, one operation is executed with one command.

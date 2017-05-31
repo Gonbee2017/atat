@@ -742,7 +742,7 @@ namespace atat
 "\n"
 "WHAT IS ATAT?\n"
 "    ATAT is an interpreter for automatically manipulating\n"
-"    keyboard and mouse.\n"
+"    keyboard and mouse on Windows.\n"
 "    ATAT reads the script from standard input.\n"
 "    The script is described as a list of commands.\n"
 "    Basically, one operation is executed with one command.\n"
