@@ -26,7 +26,7 @@ Don't show the commands to be executed.
 *CAPTION* is the caption of the target window.
 Execute the command when this window is active.
 Also, specify the relative coordinates of this window
-during 'mouse move' command.
+in 'mouse move' command.
 If it's not specified, execute the command any window active.
 
 ## COMMANDS

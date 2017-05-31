@@ -764,7 +764,7 @@ namespace atat
 "        CAPTION is the caption of the target window.\n"
 "        Execute the command when this window is active.\n"
 "        Also, specify the relative coordinates of this window\n"
-"        during 'mouse move' command.\n"
+"        in 'mouse move' command.\n"
 "        If it's not specified, execute the command any window active.\n"
 "\n"
 "COMMANDS\n"
