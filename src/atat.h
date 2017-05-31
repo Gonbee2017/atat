@@ -256,6 +256,7 @@ namespace atat
     map<string,string>&properties();
     int run(int argc,char**argv,istream&in,ostream&out,ostream&err);
     void setup_detours();
+    long to_number(const string&str);
     vector<string> tokenize(const string&str,const string&delimiters);
     void wait(const DWORD&time);
     void wait_active();

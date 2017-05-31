@@ -239,13 +239,13 @@ namespace atat
         if(row_->tokens().size()!=3)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        static map<string,DWORD> button_map(
+        static const map<string,DWORD> buttonMap(
         {
             {"left",  MOUSEEVENTF_LEFTDOWN},
             {"right", MOUSEEVENTF_RIGHTDOWN},
             {"middle",MOUSEEVENTF_MIDDLEDOWN},
         });
-        button_=button_map.at(row_->tokens().at(1));
+        button_=buttonMap.at(row_->tokens().at(1));
     }
 
     MouseButtonDoubleClickCommand::MouseButtonDoubleClickCommand
@@ -253,14 +253,13 @@ namespace atat
 
     void MouseButtonDoubleClickCommand::execute()
     {
-        send(0,0,0,button_);
-        wait(atat::GetDoubleClickTime()/4);
-        send(0,0,0,button_<<1);
-        wait(atat::GetDoubleClickTime()/4);
-        send(0,0,0,button_);
-        wait(atat::GetDoubleClickTime()/4);
-        send(0,0,0,button_<<1);
-        wait(atat::GetDoubleClickTime()/4);
+        for(size_t i=0;i<2;i++)
+        {
+            send(0,0,0,button_);
+            wait(atat::GetDoubleClickTime()/4);
+            send(0,0,0,button_<<1);
+            wait(atat::GetDoubleClickTime()/4);
+        }
         Context::instance()->index()++;
     }
 
@@ -311,8 +310,8 @@ namespace atat
         if(row_->tokens().size()!=4)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        x_=atoi(row_->tokens().at(2).c_str());
-        y_=atoi(row_->tokens().at(3).c_str());
+        x_=to_number(row_->tokens().at(2).c_str());
+        y_=to_number(row_->tokens().at(3).c_str());
     }
 
     void MouseMoveCommand::execute()
@@ -345,7 +344,7 @@ namespace atat
         if(row_->tokens().size()!=3)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        amount_=atoi(row_->tokens().at(2).c_str());
+        amount_=to_number(row_->tokens().at(2).c_str());
     }
 
     void MouseWheelCommand::execute()
@@ -354,8 +353,7 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    NullCommand::NullCommand(const shared_ptr<Row>&row_):
-        Command(row_){}
+    NullCommand::NullCommand(const shared_ptr<Row>&row_):Command(row_){}
 
     void NullCommand::execute() {Context::instance()->index()++;}
 
@@ -366,7 +364,7 @@ namespace atat
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
         if(row_->tokens().size()-1==2)
-            number_=atoi(row_->tokens().at(2).c_str());
+            number_=to_number(row_->tokens().at(2).c_str());
         else number_=0;
     }
 
@@ -403,7 +401,7 @@ namespace atat
         if(row_->tokens().size()-1!=1)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        time_=atoi(row_->tokens().at(1).c_str());
+        time_=to_number(row_->tokens().at(1).c_str());
     }
 
     void SleepCommand::execute()
@@ -685,7 +683,7 @@ namespace atat
 "    Specify a name and if it has a value, connect with an equals.\n"
 "    In the following list, a name is indicated in lowercase,\n"
 "    and a value is indicated in uppercase.\n"
-"\n"
+"    \n"
 "    help\n"
 "        Show this document, and finish without doing anything.\n"
 "    silent\n"
@@ -702,9 +700,9 @@ namespace atat
 "    Separete switches and parameters with spaces or tabs.\n"
 "    In the following list, switches are indicated in lowercase,\n"
 "    and parameters are indicated in uppercase.\n"
-"    Also, if there are multiple choices on the switch,\n"
+"    Also, if there're multiple choices on the switch,\n"
 "    separate them with vertical bars.\n"
-"\n"
+"    \n"
 "    key down|up|press KEY\n"
 "        Down or up or both the key on the keyboard.\n"
 "        KEY is the key to be operated.\n"
@@ -751,19 +749,24 @@ namespace atat
 "        When it becomes active again, execution resumes.\n"
 "\n"
 "REMARKS\n"
-"    Script can contains comments, for example:\n"
-"        # Script01 to earn experience.\n"
-"\n"
-"        # Wait for ready.\n"
-"        sleep 3000\n"
-"\n"
-"        # Repeat infinitely.\n"
-"        loop begin\n"
-"            key press TAB # Target an enemy.\n"
-"            key press 1   # Attack the target.\n"
-"        loop end\n"
-"    The string following the '#' is treated as a comment.\n"
-"    Also, empty rows just skip.\n"
+"    Number format\n"
+"        Follow the literal notation in C.\n"
+"        So, it's octal if it starts with '0',\n"
+"        or hexadecimal if it starts with '0x', otherwise decimal.\n"
+"    Comment\n"
+"        Script can contains comments, for example:\n"
+"            # Script01 to earn experience.\n"
+"            \n"
+"            # Wait for ready.\n"
+"            sleep 3000\n"
+"            \n"
+"            # Repeat infinitely.\n"
+"            loop begin\n"
+"                key press TAB # Target an enemy.\n"
+"                key press 1   # Attack the target.\n"
+"            loop end\n"
+"        The string following the '#' is treated as a comment.\n"
+"        Also, empty rows just skip.\n"
                 );
             } else
             {
@@ -774,9 +777,8 @@ namespace atat
                 )
                     throw runtime_error(describe
                     (
-                        "function:'SetConsoleCtrlHandler':failed(",
-                        GetLastError(),
-                        ")"
+                        "function:'SetConsoleCtrlHandler':"
+                        "failed(",GetLastError(),")"
                     ));
                 vector<shared_ptr<Command>> commands=parse_script(in);
                 for
@@ -796,9 +798,7 @@ namespace atat
         {
             err<<describe
             (
-                "error(",
-                Context::instance()->index(),
-                "):",
+                "error(",Context::instance()->index(),"):",
                 error.what()
             )<<endl;
             result=1;
@@ -820,6 +820,16 @@ namespace atat
         atat::SetConsoleCtrlHandler=::SetConsoleCtrlHandler;
         atat::SetEvent=::SetEvent;
         atat::WaitForSingleObject=::WaitForSingleObject;
+    }
+
+    long to_number(const string&str)
+    {
+        char*end;
+        long number=strtol(str.c_str(),&end,0);
+        if(str.empty()||*end)
+            throw runtime_error(describe
+            ("number:'",str.c_str(),"':invalid format"));
+        return number;
     }
 
     vector<string> tokenize(const string&str,const string&delimiters)

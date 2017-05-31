@@ -1,5 +1,4 @@
 # Auto Attack
-
 usage:atat [*property*[=<i>VALUE</i>]...]
 
 ## WHAT IS ATAT?
@@ -34,7 +33,7 @@ Command consists of switches followed by parameters.
 Separete switches and parameters with spaces or tabs.
 In the following list, switches are indicated in lowercase,
 and parameters are indicated in uppercase.
-Also, if there are multiple choices on the switch,
+Also, if there're multiple choices on the switch,
 separate them with vertical bars.
 
 * key down|up|press *KEY*<br/>
@@ -89,6 +88,13 @@ execution will be paused.
 When it becomes active again, execution resumes.
 
 ## REMARKS
+
+### Number format
+Follow the literal notation in C.
+So, it's octal if it starts with '0',
+or hexadecimal if it starts with '0x', otherwise decimal.
+
+### Comment
 Script can contains comments, for example:
 <pre>
 # Script01 to earn experience.

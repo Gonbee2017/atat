@@ -1267,6 +1267,26 @@ TEST(MouseMoveCommand,construct)
     });
     sand_box([] ()
     {
+        auto r=make_shared<Row>("mouse move abc 200");
+        try
+        {
+            auto mmc=make_shared<MouseMoveCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'abc':invalid format",e.what());}
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("mouse move 100 def");
+        try
+        {
+            auto mmc=make_shared<MouseMoveCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'def':invalid format",e.what());}
+    });
+    sand_box([] ()
+    {
         auto r=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(r);
     });
@@ -1677,7 +1697,7 @@ TEST(MouseWheelCommand,construct)
     });
     sand_box([] ()
     {
-        auto r=make_shared<Row>("mouse wheel 10 10");
+        auto r=make_shared<Row>("mouse wheel 10 20");
         try
         {
             auto mwc=make_shared<MouseWheelCommand>(r);
@@ -1685,8 +1705,18 @@ TEST(MouseWheelCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("row:'mouse wheel 10 10':wrong number of tokens",e.what());
+            ("row:'mouse wheel 10 20':wrong number of tokens",e.what());
         }
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("mouse wheel ab");
+        try
+        {
+            auto mwc=make_shared<MouseWheelCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'ab':invalid format",e.what());}
     });
     sand_box([] ()
     {
@@ -1817,6 +1847,16 @@ TEST(LoopBeginCommand,construct)
             STRCMP_EQUAL
             ("row:'loop begin 5 5':wrong number of tokens",e.what());
         }
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("loop begin a");
+        try
+        {
+            auto lbc=make_shared<LoopBeginCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'a':invalid format",e.what());}
     });
     sand_box([] ()
     {
@@ -2012,7 +2052,7 @@ TEST(SleepCommand,construct)
     });
     sand_box([] ()
     {
-        auto r=make_shared<Row>("sleep 1000 1000");
+        auto r=make_shared<Row>("sleep 1000 2000");
         try
         {
             auto sc=make_shared<SleepCommand>(r);
@@ -2020,8 +2060,18 @@ TEST(SleepCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("row:'sleep 1000 1000':wrong number of tokens",e.what());
+            ("row:'sleep 1000 2000':wrong number of tokens",e.what());
         }
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("sleep abcd");
+        try
+        {
+            auto sc=make_shared<SleepCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'abcd':invalid format",e.what());}
     });
     sand_box([] ()
     {
@@ -2832,6 +2882,59 @@ TEST(free,setup_detours)
             ::WaitForSingleObject,
             *atat::WaitForSingleObject.target<DWORD(*)(HANDLE,DWORD)>()
         );
+    });
+}
+
+TEST(free,to_number)
+{
+    sand_box([] ()
+    {
+        try
+        {
+            to_number("");
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'':invalid format",e.what());}
+        try
+        {
+            to_number("a12");
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'a12':invalid format",e.what());}
+        try
+        {
+            to_number("12a");
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'12a':invalid format",e.what());}
+        CHECK_EQUAL(12,to_number("12"));
+        CHECK_EQUAL(-12,to_number("-12"));
+        try
+        {
+            to_number("0812");
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'0812':invalid format",e.what());}
+        try
+        {
+            to_number("0128");
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'0128':invalid format",e.what());}
+        CHECK_EQUAL(012,to_number("012"));
+        try
+        {
+            to_number("0xg12");
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'0xg12':invalid format",e.what());}
+        try
+        {
+            to_number("0x12g");
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'0x12g':invalid format",e.what());}
+        CHECK_EQUAL(0x12,to_number("0x12"));
     });
 }
 
