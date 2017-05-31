@@ -63,7 +63,7 @@ End the loop block.
 
 ## EXAMPLE
 
-### HOW TO WRITE?
+### How to write?
 At the command prompt, type:`$ atat target=GAME`
 
 Since ATAT is waiting for input, it does as follows.
@@ -77,7 +77,7 @@ loop begin 5
 loop end
 </pre>
 
-### HOW IT WORKS?
+### How it works
 First, wait 3 seconds,
 and then move the mouse pointer to (100,200) in the GAME window.
 Next, click the left mouse button.
