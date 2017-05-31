@@ -736,7 +736,7 @@ namespace atat
             properties()=parse_properties(argc,argv);
             if(properties().find("help")!=properties().end())
             {
-                err<<describe
+                out<<describe
                 (
 "usage:",argv[0]," [property[=VALUE]...]\n"
 "\n"
@@ -834,7 +834,6 @@ namespace atat
 "    The string following the '#' is treated as a comment.\n"
 "    Also, empty rows just skip.\n"
                 );
-                result=1;
             } else
             {
                 if

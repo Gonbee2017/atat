@@ -2527,9 +2527,9 @@ TEST(free,run)
         istringstream in("");
         ostringstream out,err;
         int result=atat::run(2,(char**)argv,in,out,err);
-        CHECK_EQUAL(1,result);
-        CHECK_EQUAL("",out.str());
-        CHECK_EQUAL("usage",err.str().substr(0,5));
+        CHECK_EQUAL(0,result);
+        CHECK_EQUAL("usage",out.str().substr(0,5));
+        CHECK_EQUAL("",err.str());
     });
     sand_box([] ()
     {
