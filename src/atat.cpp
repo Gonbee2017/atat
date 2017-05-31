@@ -819,6 +819,7 @@ namespace atat
 "        If the GAME window becomes inactive halfway,\n"
 "        execution will be paused.\n"
 "        When it becomes active again, execution resumes.\n"
+"\n"
 "REMARKS\n"
 "    Script can contains comments, for example:\n"
 "        # Script01 to earn experience.\n"
