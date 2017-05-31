@@ -14,7 +14,7 @@ Press Ctrl-C to exit while running.
 
 ## PROPERTIES
 Properties are specified by command line arguments.
-Specify a name, if it has a value, specify it following the equals.
+Specify a name and if it has a value, connect with an equals.
 In the following list, a name is indicated in lowercase,
 and a value is indicated in uppercase.
 

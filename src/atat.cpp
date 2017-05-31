@@ -682,7 +682,7 @@ namespace atat
 "\n"
 "PROPERTIES\n"
 "    Properties are specified by command row arguments.\n"
-"    Specify a name, if it has a value, specify it following the equals.\n"
+"    Specify a name and if it has a value, connect with an equals.\n"
 "    In the following list, a name is indicated in lowercase,\n"
 "    and a value is indicated in uppercase.\n"
 "\n"
