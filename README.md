@@ -6,7 +6,7 @@ usage:atat [*property*[=<i>VALUE</i>]...]
 ATAT is an interpreter for automatically manipulating
 keyboard and mouse.
 ATAT reads the script from standard input.
-In the script, a list of commands is described.
+The script is described as a list of commands.
 Basically, one operation is executed with one command.
 The list of commands are executed in order from the top,
 and when it runs to the bottom, it ends.
@@ -91,12 +91,12 @@ When it becomes active again, execution resumes.
 ### REMARKS
 Script can contains comments, for example:
 <pre>
-# Script01 for attack.
+# Script01 to earn experience.
 
 # Repeat infinitely.
 loop begin
-    key press TAB    # Target enemy.
-    key press RETURN # Attack.
+    key press TAB # Target an enemy.
+    key press 1   # Attack an enemy.
 loop end
 </pre>
 The string following the '#' is treated as a comment.
