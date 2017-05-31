@@ -98,9 +98,9 @@ TEST(Command,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key down A");
+        auto l=make_shared<Row>("key down A");
         auto kdc=make_shared<KeyDownCommand>(l);
-        POINTERS_EQUAL(l.get(),kdc->line());
+        POINTERS_EQUAL(l.get(),kdc->row());
     });
 }
 
@@ -206,17 +206,17 @@ TEST(KeyCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key");
+        auto l=make_shared<Row>("key");
         try
         {
             auto kdc=make_shared<KeyDownCommand>(l);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
-        {STRCMP_EQUAL("line:'key':wrong number of tokens",e.what());}
+        {STRCMP_EQUAL("row:'key':wrong number of tokens",e.what());}
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key down A B");
+        auto l=make_shared<Row>("key down A B");
         try
         {
             auto kdc=make_shared<KeyDownCommand>(l);
@@ -224,12 +224,12 @@ TEST(KeyCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'key down A B':wrong number of tokens",e.what());
+            ("row:'key down A B':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key down HOGE");
+        auto l=make_shared<Row>("key down HOGE");
         try
         {
             auto kdc=make_shared<KeyDownCommand>(l);
@@ -239,17 +239,17 @@ TEST(KeyCommand,construct)
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key down A");
+        auto l=make_shared<Row>("key down A");
         auto kdc=make_shared<KeyDownCommand>(l);
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key down  a\t");
+        auto l=make_shared<Row>("key down  a\t");
         auto kdc=make_shared<KeyDownCommand>(l);
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key down B");
+        auto l=make_shared<Row>("key down B");
         auto kdc=make_shared<KeyDownCommand>(l);
     });
 }
@@ -289,7 +289,7 @@ TEST(KeyCommand,send)
             [&] (HANDLE hHandle,DWORD dwMilliseconds)->DWORD
             {return WAIT_TIMEOUT;};
         Context::instance()=make_shared<Context>();
-        auto l=make_shared<Line>("key down A");
+        auto l=make_shared<Row>("key down A");
         auto kdc=make_shared<KeyDownCommand>(l);
         kdc->execute();
         CHECK_EQUAL(1,h.calls().size());
@@ -342,7 +342,7 @@ TEST(KeyCommand,send)
             [&] (HANDLE hHandle,DWORD dwMilliseconds)->DWORD
             {return WAIT_TIMEOUT;};
         Context::instance()=make_shared<Context>();
-        auto l=make_shared<Line>("key down B");
+        auto l=make_shared<Row>("key down B");
         auto kuc=make_shared<KeyUpCommand>(l);
         kuc->execute();
         CHECK_EQUAL(1,h.calls().size());
@@ -370,9 +370,9 @@ TEST(KeyDownCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key down A");
+        auto l=make_shared<Row>("key down A");
         auto kdc=make_shared<KeyDownCommand>(l);
-        POINTERS_EQUAL(l.get(),kdc->line());
+        POINTERS_EQUAL(l.get(),kdc->row());
     });
 }
 
@@ -423,7 +423,7 @@ TEST(KeyDownCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("key down A");
+        auto l=make_shared<Row>("key down A");
         auto kdc=make_shared<KeyDownCommand>(l);
         kdc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -452,9 +452,9 @@ TEST(KeyPressCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key press A");
+        auto l=make_shared<Row>("key press A");
         auto kpc=make_shared<KeyPressCommand>(l);
-        POINTERS_EQUAL(l.get(),kpc->line());
+        POINTERS_EQUAL(l.get(),kpc->row());
     });
 }
 
@@ -505,7 +505,7 @@ TEST(KeyPressCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("key press A");
+        auto l=make_shared<Row>("key press A");
         auto kpc=make_shared<KeyPressCommand>(l);
         kpc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -549,9 +549,9 @@ TEST(KeyUpCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("key up A");
+        auto l=make_shared<Row>("key up A");
         auto kuc=make_shared<KeyUpCommand>(l);
-        POINTERS_EQUAL(l.get(),kuc->line());
+        POINTERS_EQUAL(l.get(),kuc->row());
     });
 }
 
@@ -602,7 +602,7 @@ TEST(KeyUpCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("key up A");
+        auto l=make_shared<Row>("key up A");
         auto kuc=make_shared<KeyUpCommand>(l);
         kuc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -625,36 +625,15 @@ TEST(KeyUpCommand,execute)
     });
 }
 
-TEST_GROUP(Line) {};
-
-TEST(Line,construct)
-{
-    sand_box([] ()
-    {
-        auto l=make_shared<Line>("abc def");
-        CHECK_EQUAL("abc def",l->description());
-        CHECK_EQUAL(2,l->tokens().size());
-        CHECK_EQUAL("abc",l->tokens().at(0));
-        CHECK_EQUAL("def",l->tokens().at(1));
-    });
-    sand_box([] ()
-    {
-        auto l=make_shared<Line>("abc#def");
-        CHECK_EQUAL("abc#def",l->description());
-        CHECK_EQUAL(1,l->tokens().size());
-        CHECK_EQUAL("abc",l->tokens().at(0));
-    });
-}
-
 TEST_GROUP(MouseButtonClickCommand) {};
 
 TEST(MouseButtonClickCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse left click");
+        auto l=make_shared<Row>("mouse left click");
         auto mbcc=make_shared<MouseButtonClickCommand>(l);
-        POINTERS_EQUAL(l.get(),mbcc->line());
+        POINTERS_EQUAL(l.get(),mbcc->row());
     });
 }
 
@@ -707,7 +686,7 @@ TEST(MouseButtonClickCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse left click");
+        auto l=make_shared<Row>("mouse left click");
         auto mbcc=make_shared<MouseButtonClickCommand>(l);
         mbcc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -755,7 +734,7 @@ TEST(MouseButtonCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse left down down");
+        auto l=make_shared<Row>("mouse left down down");
         try
         {
             auto mbdc=make_shared<MouseButtonDownCommand>(l);
@@ -764,19 +743,19 @@ TEST(MouseButtonCommand,construct)
         {
             STRCMP_EQUAL
             (
-                "line:'mouse left down down':wrong number of tokens",
+                "row:'mouse left down down':wrong number of tokens",
                 e.what()
             );
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse left down");
+        auto l=make_shared<Row>("mouse left down");
         auto mbdc=make_shared<MouseButtonDownCommand>(l);
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse right up");
+        auto l=make_shared<Row>("mouse right up");
         auto mbuc=make_shared<MouseButtonUpCommand>(l);
     });
 }
@@ -787,9 +766,9 @@ TEST(MouseButtonDoubleClickCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse left doubleclick");
+        auto l=make_shared<Row>("mouse left doubleclick");
         auto mbdcc=make_shared<MouseButtonDoubleClickCommand>(l);
-        POINTERS_EQUAL(l.get(),mbdcc->line());
+        POINTERS_EQUAL(l.get(),mbdcc->row());
     });
 }
 
@@ -842,7 +821,7 @@ TEST(MouseButtonDoubleClickCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse left doubleclick");
+        auto l=make_shared<Row>("mouse left doubleclick");
         auto mbdcc=make_shared<MouseButtonDoubleClickCommand>(l);
         mbdcc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -924,9 +903,9 @@ TEST(MouseButtonDownCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse left down");
+        auto l=make_shared<Row>("mouse left down");
         auto mbdc=make_shared<MouseButtonDownCommand>(l);
-        POINTERS_EQUAL(l.get(),mbdc->line());
+        POINTERS_EQUAL(l.get(),mbdc->row());
     });
 }
 
@@ -979,7 +958,7 @@ TEST(MouseButtonDownCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse left down");
+        auto l=make_shared<Row>("mouse left down");
         auto mbdc=make_shared<MouseButtonDownCommand>(l);
         mbdc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1010,9 +989,9 @@ TEST(MouseButtonUpCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse left up");
+        auto l=make_shared<Row>("mouse left up");
         auto mbuc=make_shared<MouseButtonUpCommand>(l);
-        POINTERS_EQUAL(l.get(),mbuc->line());
+        POINTERS_EQUAL(l.get(),mbuc->row());
     });
 }
 
@@ -1065,7 +1044,7 @@ TEST(MouseButtonUpCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse left up");
+        auto l=make_shared<Row>("mouse left up");
         auto mbuc=make_shared<MouseButtonUpCommand>(l);
         mbuc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1130,7 +1109,7 @@ TEST(MouseCommand,send)
                 h.calls().push_back(call("GetLastError"));
                 return 34;
             };
-        auto l=make_shared<Line>("mouse left down");
+        auto l=make_shared<Row>("mouse left down");
         auto mbdc=make_shared<MouseButtonDownCommand>(l);
         try
         {
@@ -1194,7 +1173,7 @@ TEST(MouseCommand,send)
             {return WAIT_TIMEOUT;};
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse left down");
+        auto l=make_shared<Row>("mouse left down");
         auto mbdc=make_shared<MouseButtonDownCommand>(l);
         mbdc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1225,7 +1204,7 @@ TEST(MouseMoveCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse move");
+        auto l=make_shared<Row>("mouse move");
         try
         {
             auto mmc=make_shared<MouseMoveCommand>(l);
@@ -1233,12 +1212,12 @@ TEST(MouseMoveCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'mouse move':wrong number of tokens",e.what());
+            ("row:'mouse move':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse move 100");
+        auto l=make_shared<Row>("mouse move 100");
         try
         {
             auto mmc=make_shared<MouseMoveCommand>(l);
@@ -1246,12 +1225,12 @@ TEST(MouseMoveCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'mouse move 100':wrong number of tokens",e.what());
+            ("row:'mouse move 100':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse move 100 200 300");
+        auto l=make_shared<Row>("mouse move 100 200 300");
         try
         {
             auto mmc=make_shared<MouseMoveCommand>(l);
@@ -1260,14 +1239,14 @@ TEST(MouseMoveCommand,construct)
         {
             STRCMP_EQUAL
             (
-                "line:'mouse move 100 200 300':wrong number of tokens",
+                "row:'mouse move 100 200 300':wrong number of tokens",
                 e.what()
             );
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse move 100 200");
+        auto l=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(l);
     });
 }
@@ -1293,7 +1272,7 @@ TEST(MouseMoveCommand,execute)
                 return 0;
             };
         Context::instance()=make_shared<Context>();
-        auto l=make_shared<Line>("mouse move 100 200");
+        auto l=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(l);
         try
         {
@@ -1335,7 +1314,7 @@ TEST(MouseMoveCommand,execute)
                 return result;
             };
         Context::instance()=make_shared<Context>();
-        auto l=make_shared<Line>("mouse move 100 200");
+        auto l=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(l);
         try
         {
@@ -1395,7 +1374,7 @@ TEST(MouseMoveCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse move 100 200");
+        auto l=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(l);
         mmc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1448,7 +1427,7 @@ TEST(MouseMoveCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->properties().insert({"target","電卓"});
-        auto l=make_shared<Line>("mouse move 100 200");
+        auto l=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(l);
         try
         {
@@ -1529,7 +1508,7 @@ TEST(MouseMoveCommand,execute)
         Context::instance()=make_shared<Context>();
         properties().insert({"target","電卓"});
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse move 100 200");
+        auto l=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(l);
         mmc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1571,7 +1550,7 @@ TEST(MouseWheelCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse wheel");
+        auto l=make_shared<Row>("mouse wheel");
         try
         {
             auto mwc=make_shared<MouseWheelCommand>(l);
@@ -1579,12 +1558,12 @@ TEST(MouseWheelCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'mouse wheel':wrong number of tokens",e.what());
+            ("row:'mouse wheel':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse wheel 10 10");
+        auto l=make_shared<Row>("mouse wheel 10 10");
         try
         {
             auto mwc=make_shared<MouseWheelCommand>(l);
@@ -1592,12 +1571,12 @@ TEST(MouseWheelCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'mouse wheel 10 10':wrong number of tokens",e.what());
+            ("row:'mouse wheel 10 10':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("mouse wheel 10");
+        auto l=make_shared<Row>("mouse wheel 10");
         auto mwc=make_shared<MouseWheelCommand>(l);
     });
 }
@@ -1634,7 +1613,7 @@ TEST(MouseWheelCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse wheel 10");
+        auto l=make_shared<Row>("mouse wheel 10");
         auto mwc=make_shared<MouseWheelCommand>(l);
         mwc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1685,7 +1664,7 @@ TEST(MouseWheelCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("mouse wheel -10");
+        auto l=make_shared<Row>("mouse wheel -10");
         auto mwc=make_shared<MouseWheelCommand>(l);
         mwc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1714,7 +1693,7 @@ TEST(LoopBeginCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("loop begin 5 5");
+        auto l=make_shared<Row>("loop begin 5 5");
         try
         {
             auto lbc=make_shared<LoopBeginCommand>(l);
@@ -1722,17 +1701,17 @@ TEST(LoopBeginCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'loop begin 5 5':wrong number of tokens",e.what());
+            ("row:'loop begin 5 5':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("loop begin");
+        auto l=make_shared<Row>("loop begin");
         auto lbc=make_shared<LoopBeginCommand>(l);
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("loop begin 5");
+        auto l=make_shared<Row>("loop begin 5");
         auto lbc=make_shared<LoopBeginCommand>(l);
     });
 }
@@ -1752,7 +1731,7 @@ TEST(LoopBeginCommand,execute)
         atat::CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("loop begin");
+        auto l=make_shared<Row>("loop begin");
         auto lbc=make_shared<LoopBeginCommand>(l);
         lbc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1774,7 +1753,7 @@ TEST(LoopBeginCommand,execute)
         atat::CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("loop begin 5");
+        auto l=make_shared<Row>("loop begin 5");
         auto lbc=make_shared<LoopBeginCommand>(l);
         lbc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1791,7 +1770,7 @@ TEST(LoopEndCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("loop end end");
+        auto l=make_shared<Row>("loop end end");
         try
         {
             auto lec=make_shared<LoopEndCommand>(l);
@@ -1799,12 +1778,12 @@ TEST(LoopEndCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'loop end end':wrong number of tokens",e.what());
+            ("row:'loop end end':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("loop end");
+        auto l=make_shared<Row>("loop end");
         auto lec=make_shared<LoopEndCommand>(l);
     });
 }
@@ -1825,7 +1804,7 @@ TEST(LoopEndCommand,execute)
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=6;
         Context::instance()->frames().push_back({0,4,0});
-        auto l=make_shared<Line>("loop end");
+        auto l=make_shared<Row>("loop end");
         auto lec=make_shared<LoopEndCommand>(l);
         lec->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1848,7 +1827,7 @@ TEST(LoopEndCommand,execute)
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=6;
         Context::instance()->frames().push_back({3,4,5});
-        auto l=make_shared<Line>("loop end");
+        auto l=make_shared<Row>("loop end");
         auto lec=make_shared<LoopEndCommand>(l);
         lec->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -1871,11 +1850,32 @@ TEST(LoopEndCommand,execute)
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=6;
         Context::instance()->frames().push_back({4,4,5});
-        auto l=make_shared<Line>("loop end");
+        auto l=make_shared<Row>("loop end");
         auto lec=make_shared<LoopEndCommand>(l);
         lec->execute();
         CHECK_EQUAL(7,Context::instance()->index());
         CHECK_EQUAL(1,Context::instance()->frames().size());
+    });
+}
+
+TEST_GROUP(Row) {};
+
+TEST(Row,construct)
+{
+    sand_box([] ()
+    {
+        auto l=make_shared<Row>("abc def");
+        CHECK_EQUAL("abc def",l->description());
+        CHECK_EQUAL(2,l->tokens().size());
+        CHECK_EQUAL("abc",l->tokens().at(0));
+        CHECK_EQUAL("def",l->tokens().at(1));
+    });
+    sand_box([] ()
+    {
+        auto l=make_shared<Row>("abc#def");
+        CHECK_EQUAL("abc#def",l->description());
+        CHECK_EQUAL(1,l->tokens().size());
+        CHECK_EQUAL("abc",l->tokens().at(0));
     });
 }
 
@@ -1885,7 +1885,7 @@ TEST(SleepCommand,construct)
 {
     sand_box([] ()
     {
-        auto l=make_shared<Line>("sleep");
+        auto l=make_shared<Row>("sleep");
         try
         {
             auto sc=make_shared<SleepCommand>(l);
@@ -1893,12 +1893,12 @@ TEST(SleepCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'sleep':wrong number of tokens",e.what());
+            ("row:'sleep':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("sleep 3000 3000");
+        auto l=make_shared<Row>("sleep 3000 3000");
         try
         {
             auto sc=make_shared<SleepCommand>(l);
@@ -1906,12 +1906,12 @@ TEST(SleepCommand,construct)
         } catch(const runtime_error&e)
         {
             STRCMP_EQUAL
-            ("line:'sleep 3000 3000':wrong number of tokens",e.what());
+            ("row:'sleep 3000 3000':wrong number of tokens",e.what());
         }
     });
     sand_box([] ()
     {
-        auto l=make_shared<Line>("sleep 3000");
+        auto l=make_shared<Row>("sleep 3000");
         auto sc=make_shared<SleepCommand>(l);
     });
 }
@@ -1943,7 +1943,7 @@ TEST(SleepCommand,execute)
             };
         Context::instance()=make_shared<Context>();
         Context::instance()->index()=3;
-        auto l=make_shared<Line>("sleep 3000");
+        auto l=make_shared<Row>("sleep 3000");
         auto sc=make_shared<SleepCommand>(l);
         sc->execute();
         CHECK_EQUAL(4,Context::instance()->index());
@@ -2185,16 +2185,16 @@ TEST(free,new_command)
         {
             {
                 "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyDownCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyDownCommand>(row);}
             },
             {
                 "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyUpCommand>(row);}
             },
         });
-        auto l=make_shared<Line>("");
+        auto l=make_shared<Row>("");
         CHECK(dynamic_cast<NullCommand*>(new_command(fs,l,0).get()));
     });
     sand_box([] ()
@@ -2203,22 +2203,22 @@ TEST(free,new_command)
         {
             {
                 "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyDownCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyDownCommand>(row);}
             },
             {
                 "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyUpCommand>(row);}
             },
         });
-        auto l=make_shared<Line>("key down A");
+        auto l=make_shared<Row>("key down A");
         try
         {
             auto c=new_command(fs,l,3);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
-        {STRCMP_EQUAL("line:'key down A':few switches",e.what());}
+        {STRCMP_EQUAL("row:'key down A':few switches",e.what());}
     });
     sand_box([] ()
     {
@@ -2226,16 +2226,16 @@ TEST(free,new_command)
         {
             {
                 "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyDownCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyDownCommand>(row);}
             },
             {
                 "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyUpCommand>(row);}
             },
         });
-        auto l=make_shared<Line>("key press A");
+        auto l=make_shared<Row>("key press A");
         try
         {
             auto c=new_command(fs,l,1);
@@ -2249,16 +2249,16 @@ TEST(free,new_command)
         {
             {
                 "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyDownCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyDownCommand>(row);}
             },
             {
                 "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyUpCommand>(row);}
             },
         });
-        auto l=make_shared<Line>("key down A");
+        auto l=make_shared<Row>("key down A");
         CHECK(dynamic_cast<KeyDownCommand*>(new_command(fs,l,1).get()));
     });
     sand_box([] ()
@@ -2267,16 +2267,16 @@ TEST(free,new_command)
         {
             {
                 "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyDownCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyDownCommand>(row);}
             },
             {
                 "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyUpCommand>(row);}
             },
         });
-        auto l=make_shared<Line>("key DoWn A");
+        auto l=make_shared<Row>("key DoWn A");
         CHECK(dynamic_cast<KeyDownCommand*>(new_command(fs,l,1).get()));
     });
     sand_box([] ()
@@ -2285,21 +2285,41 @@ TEST(free,new_command)
         {
             {
                 "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyDownCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyDownCommand>(row);}
             },
             {
                 "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(line);}
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyUpCommand>(row);}
             },
         });
-        auto l=make_shared<Line>("key up A");
+        auto l=make_shared<Row>("key up A");
         CHECK(dynamic_cast<KeyUpCommand*>(new_command(fs,l,1).get()));
     });
 }
 
-TEST(free,parse_list)
+TEST(free,parse_properties)
+{
+    sand_box([] ()
+    {
+        static const char*argv[]=
+        {
+            "test",
+            "a",
+            "b=c",
+        };
+        auto ps=parse_properties(3,(char**)argv);
+        CHECK_EQUAL(2,ps.size());
+        CHECK(ps.find("a")!=ps.end());
+        CHECK_EQUAL("",ps.at("a"));
+        CHECK(ps.find("b")!=ps.end());
+        CHECK_EQUAL("c",ps.at("b"));
+        CHECK(ps.find("d")==ps.end());
+    });
+}
+
+TEST(free,parse_script)
 {
     sand_box([] ()
     {
@@ -2335,7 +2355,7 @@ TEST(free,parse_list)
             " \n"
         );
         Context::instance()=make_shared<Context>();
-        auto cs=parse_list(iss);
+        auto cs=parse_script(iss);
         CHECK_EQUAL(19,cs.size());
         CHECK(dynamic_cast<KeyDownCommand*>(cs.at(0).get()));
         CHECK(dynamic_cast<KeyUpCommand*>(cs.at(1).get()));
@@ -2357,26 +2377,6 @@ TEST(free,parse_list)
         CHECK(dynamic_cast<SleepCommand*>(cs.at(17).get()));
         CHECK(dynamic_cast<NullCommand*>(cs.at(18).get()));
         CHECK_EQUAL(19,Context::instance()->index());
-    });
-}
-
-TEST(free,parse_properties)
-{
-    sand_box([] ()
-    {
-        static const char*argv[]=
-        {
-            "test",
-            "a",
-            "b=c",
-        };
-        auto ps=parse_properties(3,(char**)argv);
-        CHECK_EQUAL(2,ps.size());
-        CHECK(ps.find("a")!=ps.end());
-        CHECK_EQUAL("",ps.at("a"));
-        CHECK(ps.find("b")!=ps.end());
-        CHECK_EQUAL("c",ps.at("b"));
-        CHECK(ps.find("d")==ps.end());
     });
 }
 

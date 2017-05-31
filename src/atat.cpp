@@ -4,9 +4,9 @@
 
 namespace atat
 {
-    Command::Command(const shared_ptr<Line>&line_):line_(line_) {}
+    Command::Command(const shared_ptr<Row>&row_):row_(row_) {}
 
-    Line*Command::line() {return line_.get();}
+    Row*Command::row() {return row_.get();}
 
     Context::Context():frames_({{0,0,0}}),index_(0)
     {
@@ -33,16 +33,16 @@ namespace atat
 
     shared_ptr<Context> Context::instance_;
 
-    KeyCommand::KeyCommand(const shared_ptr<Line>&line_):Command(line_)
+    KeyCommand::KeyCommand(const shared_ptr<Row>&row_):Command(row_)
     {
-        if(line_->tokens().size()-1!=2)
+        if(row_->tokens().size()-1!=2)
             throw runtime_error(describe
             (
-                "line:'",
-                line_->description(),
+                "row:'",
+                row_->description(),
                 "':wrong number of tokens"
             ));
-        string key=line_->tokens().at(2);
+        string key=row_->tokens().at(2);
         static map<string,WORD> keyMap(
         {
             {lower_case("ESCAPE"),      0x01},
@@ -141,7 +141,7 @@ namespace atat
             {lower_case("CIRCUMFLEX"),  0x90},
             {lower_case("AT"),          0x91},
             {lower_case("COLON"),       0x92},
-            {lower_case("UNDERLINE"),   0x93},
+            {lower_case("UNDERrow"),   0x93},
             {lower_case("KANJI"),       0x94},
             {lower_case("STOP"),        0x95},
             {lower_case("AX"),          0x96},
@@ -196,8 +196,8 @@ namespace atat
             ));
     }
 
-    KeyDownCommand::KeyDownCommand(const shared_ptr<Line>&line_):
-        KeyCommand(line_) {}
+    KeyDownCommand::KeyDownCommand(const shared_ptr<Row>&row_):
+        KeyCommand(row_) {}
 
     void KeyDownCommand::execute()
     {
@@ -206,8 +206,8 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    KeyPressCommand::KeyPressCommand(const shared_ptr<Line>&line_):
-        KeyCommand(line_) {}
+    KeyPressCommand::KeyPressCommand(const shared_ptr<Row>&row_):
+        KeyCommand(row_) {}
 
     void KeyPressCommand::execute()
     {
@@ -218,7 +218,7 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    KeyUpCommand::KeyUpCommand(const shared_ptr<Line>&line_):KeyCommand(line_) {}
+    KeyUpCommand::KeyUpCommand(const shared_ptr<Row>&row_):KeyCommand(row_) {}
 
     void KeyUpCommand::execute()
     {
@@ -227,19 +227,19 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    Line::Line(const string&description_):description_(description_)
+    Row::Row(const string&description_):description_(description_)
     {
         string::size_type shrpos=description_.find_first_of('#');
         if(shrpos==string::npos) shrpos=description_.length();
         tokens_=tokenize(description_.substr(0,shrpos)," \t");
     }
 
-    const string&Line::description() {return description_;}
+    const string&Row::description() {return description_;}
 
-    const vector<string>&Line::tokens() {return tokens_;}
+    const vector<string>&Row::tokens() {return tokens_;}
 
     MouseButtonClickCommand::MouseButtonClickCommand
-    (const shared_ptr<Line>&line_):MouseButtonCommand(line_) {}
+    (const shared_ptr<Row>&row_):MouseButtonCommand(row_) {}
 
     void MouseButtonClickCommand::execute()
     {
@@ -250,14 +250,14 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    MouseButtonCommand::MouseButtonCommand(const shared_ptr<Line>&line_):
-        MouseCommand(line_)
+    MouseButtonCommand::MouseButtonCommand(const shared_ptr<Row>&row_):
+        MouseCommand(row_)
     {
-        if(line_->tokens().size()!=3)
+        if(row_->tokens().size()!=3)
             throw runtime_error(describe
             (
-                "line:'",
-                line_->description(),
+                "row:'",
+                row_->description(),
                 "':wrong number of tokens"
             ));
         static map<string,DWORD> button_map(
@@ -266,11 +266,11 @@ namespace atat
             {"right", MOUSEEVENTF_RIGHTDOWN},
             {"middle",MOUSEEVENTF_MIDDLEDOWN},
         });
-        button_=button_map.at(line_->tokens().at(1));
+        button_=button_map.at(row_->tokens().at(1));
     }
 
     MouseButtonDoubleClickCommand::MouseButtonDoubleClickCommand
-    (const shared_ptr<Line>&line_):MouseButtonCommand(line_) {}
+    (const shared_ptr<Row>&row_):MouseButtonCommand(row_) {}
 
     void MouseButtonDoubleClickCommand::execute()
     {
@@ -286,7 +286,7 @@ namespace atat
     }
 
     MouseButtonDownCommand::MouseButtonDownCommand
-    (const shared_ptr<Line>&line_):MouseButtonCommand(line_) {}
+    (const shared_ptr<Row>&row_):MouseButtonCommand(row_) {}
 
     void MouseButtonDownCommand::execute()
     {
@@ -295,8 +295,8 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    MouseButtonUpCommand::MouseButtonUpCommand(const shared_ptr<Line>&line_):
-        MouseButtonCommand(line_) {}
+    MouseButtonUpCommand::MouseButtonUpCommand(const shared_ptr<Row>&row_):
+        MouseButtonCommand(row_) {}
 
     void MouseButtonUpCommand::execute()
     {
@@ -330,18 +330,18 @@ namespace atat
             ));
     }
 
-    MouseMoveCommand::MouseMoveCommand(const shared_ptr<Line>&line_):
-        MouseCommand(line_)
+    MouseMoveCommand::MouseMoveCommand(const shared_ptr<Row>&row_):
+        MouseCommand(row_)
     {
-        if(line_->tokens().size()!=4)
+        if(row_->tokens().size()!=4)
             throw runtime_error(describe
             (
-                "line:'",
-                line_->description(),
+                "row:'",
+                row_->description(),
                 "':wrong number of tokens"
             ));
-        x_=atoi(line_->tokens().at(2).c_str());
-        y_=atoi(line_->tokens().at(3).c_str());
+        x_=atoi(row_->tokens().at(2).c_str());
+        y_=atoi(row_->tokens().at(3).c_str());
     }
 
     void MouseMoveCommand::execute()
@@ -372,17 +372,17 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    MouseWheelCommand::MouseWheelCommand(const shared_ptr<Line>&line_):
-        MouseCommand(line_)
+    MouseWheelCommand::MouseWheelCommand(const shared_ptr<Row>&row_):
+        MouseCommand(row_)
     {
-        if(line_->tokens().size()!=3)
+        if(row_->tokens().size()!=3)
             throw runtime_error(describe
             (
-                "line:'",
-                line_->description(),
+                "row:'",
+                row_->description(),
                 "':wrong number of tokens"
             ));
-        amount_=atoi(line_->tokens().at(2).c_str());
+        amount_=atoi(row_->tokens().at(2).c_str());
     }
 
     void MouseWheelCommand::execute()
@@ -391,23 +391,23 @@ namespace atat
         Context::instance()->index()++;
     }
 
-    NullCommand::NullCommand(const shared_ptr<Line>&line_):
-        Command(line_){}
+    NullCommand::NullCommand(const shared_ptr<Row>&row_):
+        Command(row_){}
 
     void NullCommand::execute() {Context::instance()->index()++;}
 
-    LoopBeginCommand::LoopBeginCommand(const shared_ptr<Line>&line_):
-        Command(line_)
+    LoopBeginCommand::LoopBeginCommand(const shared_ptr<Row>&row_):
+        Command(row_)
     {
-        if(line_->tokens().size()-1>2)
+        if(row_->tokens().size()-1>2)
             throw runtime_error(describe
             (
-                "line:'",
-                line_->description(),
+                "row:'",
+                row_->description(),
                 "':wrong number of tokens"
             ));
-        if(line_->tokens().size()-1==2)
-            number_=atoi(line_->tokens().at(2).c_str());
+        if(row_->tokens().size()-1==2)
+            number_=atoi(row_->tokens().at(2).c_str());
         else number_=0;
     }
 
@@ -417,13 +417,13 @@ namespace atat
         ({0,++Context::instance()->index(),number_});
     }
 
-    LoopEndCommand::LoopEndCommand(const shared_ptr<Line>&line_):Command(line_)
+    LoopEndCommand::LoopEndCommand(const shared_ptr<Row>&row_):Command(row_)
     {
-        if(line_->tokens().size()-1!=1)
+        if(row_->tokens().size()-1!=1)
             throw runtime_error(describe
             (
-                "line:'",
-                line_->description(),
+                "row:'",
+                row_->description(),
                 "':wrong number of tokens"
             ));
     }
@@ -443,16 +443,16 @@ namespace atat
         }
     }
 
-    SleepCommand::SleepCommand(const shared_ptr<Line>&line_):Command(line_)
+    SleepCommand::SleepCommand(const shared_ptr<Row>&row_):Command(row_)
     {
-        if(line_->tokens().size()-1!=1)
+        if(row_->tokens().size()-1!=1)
             throw runtime_error(describe
             (
-                "line:'",
-                line_->description(),
+                "row:'",
+                row_->description(),
                 "':wrong number of tokens"
             ));
-        time_=atoi(line_->tokens().at(1).c_str());
+        time_=atoi(row_->tokens().at(1).c_str());
     }
 
     void SleepCommand::execute()
@@ -555,22 +555,22 @@ namespace atat
     shared_ptr<Command> new_command
     (
         const map<string,COMMAND_FACTORY>&factories,
-        const shared_ptr<Line>&line,
+        const shared_ptr<Row>&row,
         const size_t&index
     )
     {
         shared_ptr<Command> command;
-        if(line->tokens().empty()) command=make_shared<NullCommand>(line);
+        if(row->tokens().empty()) command=make_shared<NullCommand>(row);
         else
         {
-            if(line->tokens().size()<=index)
+            if(row->tokens().size()<=index)
                 throw runtime_error(describe
                 (
-                    "line:'",
-                    line->description(),
+                    "row:'",
+                    row->description(),
                     "':few switches"
                 ));
-            string switch_=lower_case(line->tokens().at(index));
+            string switch_=lower_case(row->tokens().at(index));
             if(factories.find(switch_)==factories.end())
                 throw runtime_error(describe
                 (
@@ -578,131 +578,9 @@ namespace atat
                     switch_,
                     "':unknown"
                 ));
-            command=factories.at(switch_)(line);
+            command=factories.at(switch_)(row);
         }
         return command;
-    }
-
-    vector<shared_ptr<Command>> parse_list(istream&is)
-    {
-        static map<string,COMMAND_FACTORY> keyCommandFactories(
-        {
-            {
-                "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyDownCommand>(line);}
-            },
-            {
-                "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(line);}
-            },
-            {
-                "press",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<KeyPressCommand>(line);}
-            },
-        });
-        static map<string,COMMAND_FACTORY> mouseButtonCommandFactories(
-        {
-            {
-                "down",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<MouseButtonDownCommand>(line);}
-            },
-            {
-                "up",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<MouseButtonUpCommand>(line);}
-            },
-            {
-                "click",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<MouseButtonClickCommand>(line);}
-            },
-            {
-                "doubleclick",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<MouseButtonDoubleClickCommand>(line);}
-            },
-        });
-        static map<string,COMMAND_FACTORY> mouseCommandFactories(
-        {
-            {
-                "move",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<MouseMoveCommand>(line);}
-            },
-            {
-                "wheel",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<MouseWheelCommand>(line);}
-            },
-            {
-                "left",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return new_command(mouseButtonCommandFactories,line,2);}
-            },
-            {
-                "right",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return new_command(mouseButtonCommandFactories,line,2);}
-            },
-            {
-                "middle",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return new_command(mouseButtonCommandFactories,line,2);}
-            },
-        });
-        static map<string,COMMAND_FACTORY> loopCommandFactories(
-        {
-            {
-                "begin",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<LoopBeginCommand>(line);}
-            },
-            {
-                "end",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<LoopEndCommand>(line);}
-            },
-        });
-        static map<string,COMMAND_FACTORY> commandFactories(
-        {
-            {
-                "key",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return new_command(keyCommandFactories,line,1);}
-            },
-            {
-                "mouse",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return new_command(mouseCommandFactories,line,1);}
-            },
-            {
-                "loop",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return new_command(loopCommandFactories,line,1);}
-            },
-            {
-                "sleep",
-                [] (const shared_ptr<Line>&line)->shared_ptr<Command>
-                {return make_shared<SleepCommand>(line);}
-            },
-        });
-        vector<shared_ptr<Command>> commands;
-        string description;
-        for
-        (
-            Context::instance()->index()=0;
-            getline(is,description);
-            Context::instance()->index()++
-        )
-        {
-            auto line=make_shared<Line>(description);
-            commands.push_back(new_command(commandFactories,line,0));
-        }
-        return commands;
     }
 
     map<string,string> parse_properties(int argc,char**argv)
@@ -724,6 +602,128 @@ namespace atat
          return properties_;
     }
 
+    vector<shared_ptr<Command>> parse_script(istream&is)
+    {
+        static map<string,COMMAND_FACTORY> keyCommandFactories(
+        {
+            {
+                "down",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyDownCommand>(row);}
+            },
+            {
+                "up",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyUpCommand>(row);}
+            },
+            {
+                "press",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<KeyPressCommand>(row);}
+            },
+        });
+        static map<string,COMMAND_FACTORY> mouseButtonCommandFactories(
+        {
+            {
+                "down",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseButtonDownCommand>(row);}
+            },
+            {
+                "up",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseButtonUpCommand>(row);}
+            },
+            {
+                "click",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseButtonClickCommand>(row);}
+            },
+            {
+                "doubleclick",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseButtonDoubleClickCommand>(row);}
+            },
+        });
+        static map<string,COMMAND_FACTORY> mouseCommandFactories(
+        {
+            {
+                "move",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseMoveCommand>(row);}
+            },
+            {
+                "wheel",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseWheelCommand>(row);}
+            },
+            {
+                "left",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(mouseButtonCommandFactories,row,2);}
+            },
+            {
+                "right",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(mouseButtonCommandFactories,row,2);}
+            },
+            {
+                "middle",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(mouseButtonCommandFactories,row,2);}
+            },
+        });
+        static map<string,COMMAND_FACTORY> loopCommandFactories(
+        {
+            {
+                "begin",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<LoopBeginCommand>(row);}
+            },
+            {
+                "end",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<LoopEndCommand>(row);}
+            },
+        });
+        static map<string,COMMAND_FACTORY> commandFactories(
+        {
+            {
+                "key",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(keyCommandFactories,row,1);}
+            },
+            {
+                "mouse",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(mouseCommandFactories,row,1);}
+            },
+            {
+                "loop",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(loopCommandFactories,row,1);}
+            },
+            {
+                "sleep",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<SleepCommand>(row);}
+            },
+        });
+        vector<shared_ptr<Command>> commands;
+        string description;
+        for
+        (
+            Context::instance()->index()=0;
+            getline(is,description);
+            Context::instance()->index()++
+        )
+        {
+            auto row=make_shared<Row>(description);
+            commands.push_back(new_command(commandFactories,row,0));
+        }
+        return commands;
+    }
+
     map<string,string>&properties()
     {return Context::instance()->properties();}
 
@@ -743,14 +743,15 @@ namespace atat
 "WHAT IS ATAT?\n"
 "    ATAT is an interpreter for automatically manipulating\n"
 "    keyboard and mouse.\n"
-"    ATAT reads the list of commands from standard input.\n"
+"    ATAT reads the script from standard input.\n"
+"    In the script, a list of commands is described.\n"
 "    Basically, one operation is executed with one command.\n"
 "    The list of commands are executed in order from the top,\n"
 "    and when it runs to the bottom, it ends.\n"
 "    Press Ctrl-C to exit while running.\n"
 "\n"
 "PROPERTIES\n"
-"    Properties are specified by command line arguments.\n"
+"    Properties are specified by command row arguments.\n"
 "    Specify a name, if it has a value, specify it following the equals.\n"
 "    In the following list, a name is indicated in lowercase,\n"
 "    and a value is indicated in uppercase.\n"
@@ -799,8 +800,7 @@ namespace atat
 "\n"
 "EXAMPLE\n"
 "    HOW TO WRITE?\n"
-"        At the command prompt, type:\n"
-"            $ atat target=GAME\n"
+"        At the command prompt, type:$ atat target=GAME\n"
 "        Since ATAT is waiting for input, it does as follows.\n"
 "            sleep 3000\n"
 "            mouse move 100 200\n"
@@ -819,6 +819,17 @@ namespace atat
 "        If the GAME window becomes inactive halfway,\n"
 "        execution will be paused.\n"
 "        When it becomes active again, execution resumes.\n"
+"    REMARKS\n"
+"        Script can contains comments, for example:\n"
+"            # Script01 for attack.\n"
+"\n"
+"            # Repeat infinitely.\n"
+"            loop begin\n"
+"                key press TAB    # Target enemy.\n"
+"                key press RETURN # Attack.\n"
+"            loop end\n"
+"        The string following the '#' is treated as a comment.\n"
+"        Also, empty rows just skip.\n"
                 );
                 result=1;
             } else
@@ -834,7 +845,7 @@ namespace atat
                         GetLastError(),
                         ")"
                     ));
-                vector<shared_ptr<Command>> commands=parse_list(in);
+                vector<shared_ptr<Command>> commands=parse_script(in);
                 for
                 (
                     Context::instance()->index()=0;
@@ -844,7 +855,7 @@ namespace atat
                     wait_active();
                     auto command=commands.at(Context::instance()->index());
                     if(properties().find("silent")==properties().end())
-                        out<<command->line()->description()<<endl;
+                        out<<command->row()->description()<<endl;
                     command->execute();
                 }
             }

@@ -23,7 +23,6 @@ namespace atat
     class KeyDownCommand;
     class KeyPressCommand;
     class KeyUpCommand;
-    class Line;
     class LoopBeginCommand;
     class LoopEndCommand;
     class MouseButtonClickCommand;
@@ -35,6 +34,7 @@ namespace atat
     class MouseMoveCommand;
     class MouseWheelCommand;
     class NullCommand;
+    class Row;
     class SleepCommand;
     class SystemObject;
 
@@ -67,18 +67,18 @@ namespace atat
     class Command
     {
     public:
-        Line*line();
+        Row*row();
         virtual void execute()=0;
     protected:
-        Command(const shared_ptr<Line>&line_);
+        Command(const shared_ptr<Row>&row_);
     private:
-        shared_ptr<Line> line_;
+        shared_ptr<Row> row_;
     };
 
     class KeyCommand:public Command
     {
     protected:
-        KeyCommand(const shared_ptr<Line>&line_);
+        KeyCommand(const shared_ptr<Row>&row_);
         static void send(const WORD&code,const DWORD&up);
         WORD code_;
     };
@@ -86,28 +86,28 @@ namespace atat
     class KeyDownCommand:public KeyCommand
     {
     public:
-        KeyDownCommand(const shared_ptr<Line>&line_);
+        KeyDownCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
     class KeyPressCommand:public KeyCommand
     {
     public:
-        KeyPressCommand(const shared_ptr<Line>&line_);
+        KeyPressCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
     class KeyUpCommand:public KeyCommand
     {
     public:
-        KeyUpCommand(const shared_ptr<Line>&line_);
+        KeyUpCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
-    class Line
+    class Row
     {
     public:
-        Line(const string&description_);
+        Row(const string&description_);
         const string&description();
         const vector<string>&tokens();
     private:
@@ -118,7 +118,7 @@ namespace atat
     class LoopBeginCommand:public Command
     {
     public:
-        LoopBeginCommand(const shared_ptr<Line>&line_);
+        LoopBeginCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     private:
         size_t number_;
@@ -127,7 +127,7 @@ namespace atat
     class LoopEndCommand:public Command
     {
     public:
-        LoopEndCommand(const shared_ptr<Line>&line_);
+        LoopEndCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
@@ -147,42 +147,42 @@ namespace atat
     class MouseButtonCommand:public MouseCommand
     {
     protected:
-        MouseButtonCommand(const shared_ptr<Line>&line_);
+        MouseButtonCommand(const shared_ptr<Row>&row_);
         DWORD button_;
     };
 
     class MouseButtonClickCommand:public MouseButtonCommand
     {
     public:
-        MouseButtonClickCommand(const shared_ptr<Line>&line_);
+        MouseButtonClickCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
     class MouseButtonDoubleClickCommand:public MouseButtonCommand
     {
     public:
-        MouseButtonDoubleClickCommand(const shared_ptr<Line>&line_);
+        MouseButtonDoubleClickCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
     class MouseButtonDownCommand:public MouseButtonCommand
     {
     public:
-        MouseButtonDownCommand(const shared_ptr<Line>&line_);
+        MouseButtonDownCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
     class MouseButtonUpCommand:public MouseButtonCommand
     {
     public:
-        MouseButtonUpCommand(const shared_ptr<Line>&line_);
+        MouseButtonUpCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
     class MouseMoveCommand:public MouseCommand
     {
     public:
-        MouseMoveCommand(const shared_ptr<Line>&line_);
+        MouseMoveCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     private:
         size_t x_;
@@ -192,7 +192,7 @@ namespace atat
     class MouseWheelCommand:public MouseCommand
     {
     public:
-        MouseWheelCommand(const shared_ptr<Line>&line_);
+        MouseWheelCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     private:
         LONG amount_;
@@ -201,14 +201,14 @@ namespace atat
     class NullCommand:public Command
     {
     public:
-        NullCommand(const shared_ptr<Line>&line_);
+        NullCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     };
 
     class SleepCommand:public Command
     {
     public:
-        SleepCommand(const shared_ptr<Line>&line_);
+        SleepCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     private:
         DWORD time_;
@@ -225,7 +225,7 @@ namespace atat
     };
 
     using COMMAND_FACTORY=
-        function<shared_ptr<Command>(const shared_ptr<Line>&line)>;
+        function<shared_ptr<Command>(const shared_ptr<Row>&row)>;
 
     BOOL control_key_pressed(DWORD type);
     template<class...ARGUMENTS> string describe(ARGUMENTS&&...arguments);
@@ -248,11 +248,11 @@ namespace atat
     shared_ptr<Command> new_command
     (
         const map<string,COMMAND_FACTORY>&commandFactories,
-        const shared_ptr<Line>&line,
+        const shared_ptr<Row>&row,
         const size_t&switchIndex
     );
-    vector<shared_ptr<Command>> parse_list(istream&is);
     map<string,string> parse_properties(int argc,char**argv);
+    vector<shared_ptr<Command>> parse_script(istream&is);
     map<string,string>&properties();
     int run(int argc,char**argv,istream&in,ostream&out,ostream&err);
     void setup_io();
