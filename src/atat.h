@@ -185,8 +185,8 @@ namespace atat
         MouseMoveCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
     private:
-        size_t x_;
-        size_t y_;
+        LONG x_;
+        LONG y_;
     };
 
     class MouseWheelCommand:public MouseCommand

@@ -1542,6 +1542,109 @@ TEST(MouseMoveCommand,execute)
             h.calls().at(4)
         );
     });
+    sand_box([] ()
+    {
+        history h;
+        atat::CreateEvent=
+            [&]
+            (
+                LPSECURITY_ATTRIBUTES lpEventAttributes,
+                BOOL bManualReset,
+                BOOL bInitialState,
+                LPCTSTR lpName
+            )->HANDLE {return (HANDLE)0x12;};
+        atat::CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
+        atat::FindWindowW=
+            [&]
+            (const wchar_t*lpClassName,const wchar_t*lpWindowName)->HWND
+            {
+                h.calls().push_back(call
+                (
+                    "FindWindowW",
+                    (const char*)lpClassName,
+                    (const char*)lpWindowName
+                ));
+                return (HWND)0x56;
+            };
+        atat::GetWindowRect=
+            [&] (HWND hWnd,LPRECT lpRect)->BOOL
+            {
+                h.calls().push_back(call("GetWindowRect",hWnd));
+                lpRect->left=100;
+                lpRect->top=200;
+                return TRUE;
+            };
+        atat::GetSystemMetrics=
+            [&] (int nIndex)->int
+            {
+                h.calls().push_back(call("GetSystemMetrics",nIndex));
+                int result;
+                switch(h.number_of("GetSystemMetrics"))
+                {
+                case 1:
+                    result=400;
+                    break;
+                case 2:
+                    result=300;
+                    break;
+                default:
+                    FAIL("Don't pass here");
+                };
+                return result;
+            };
+        atat::SendInput=
+            [&] (UINT nInputs,LPINPUT pInputs,int cbSize)->UINT
+            {
+                h.calls().push_back(call
+                (
+                    "SendInput",
+                    nInputs,
+                    pInputs->type,
+                    pInputs->mi.dx,
+                    pInputs->mi.dy,
+                    pInputs->mi.mouseData,
+                    pInputs->mi.dwFlags,
+                    cbSize
+                ));
+                return 1;
+            };
+        Context::instance()=make_shared<Context>();
+        properties().insert({"target","電卓"});
+        Context::instance()->index()=3;
+        auto r=make_shared<Row>("mouse move -30 -60");
+        auto mmc=make_shared<MouseMoveCommand>(r);
+        mmc->execute();
+        CHECK_EQUAL(4,Context::instance()->index());
+        CHECK_EQUAL(5,h.calls().size());
+        CHECK_EQUAL
+        (
+            call
+            (
+                "FindWindowW",
+                (const char*)NULL,
+                (const char*)L"電卓"
+            ),
+            h.calls().at(0)
+        );
+        CHECK_EQUAL(call("GetWindowRect",(HWND)0x56),h.calls().at(1));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(2));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(3));
+        CHECK_EQUAL
+        (
+            call
+            (
+                "SendInput",
+                1,
+                INPUT_MOUSE,
+                (70<<16)/400,
+                (140<<16)/300,
+                0,
+                MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE,
+                sizeof(INPUT)*1
+            ),
+            h.calls().at(4)
+        );
+    });
 }
 
 TEST_GROUP(MouseWheelCommand) {};
