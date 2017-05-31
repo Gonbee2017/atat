@@ -161,12 +161,7 @@ TEST(Context,destruct)
         atat::CloseHandle=
             [&] (HANDLE hObject)->BOOL
             {
-                h.calls().push_back(call
-                (
-                    "CloseHandle",
-                    hObject
-                ));
-                CHECK_EQUAL((HANDLE)0x12,hObject);
+                h.calls().push_back(call("CloseHandle",hObject));
                 return TRUE;
             };
         make_shared<Context>();
