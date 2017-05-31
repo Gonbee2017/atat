@@ -2609,7 +2609,19 @@ TEST(free,run)
                     hHandle,
                     dwMilliseconds
                 ));
-                return WAIT_OBJECT_0;
+                DWORD result;
+                switch(h.number_of("WaitForSingleObject"))
+                {
+                case 1:
+                    result=WAIT_TIMEOUT;
+                    break;
+                case 2:
+                    result=WAIT_OBJECT_0;
+                    break;
+                default:
+                    FAIL("Don't pass here.");
+                };
+                return result;
             };
         Context::instance()=make_shared<Context>();
         static const char*argv[]={"test"};
@@ -2617,20 +2629,24 @@ TEST(free,run)
         (
             "sleep 1000\n"
             "sleep 2000\n"
+            "sleep 3000\n"
         );
         ostringstream out,err;
         int result=atat::run(1,(char**)argv,in,out,err);
         CHECK_EQUAL(0,result);
         CHECK_EQUAL
         (
-            "sleep 1000\n",
+            "sleep 1000\n"
+            "sleep 2000\n",
             out.str()
         );
         CHECK_EQUAL("",err.str());
-        CHECK_EQUAL(0,Context::instance()->index());
-        CHECK_EQUAL(1,h.calls().size());
+        CHECK_EQUAL(1,Context::instance()->index());
+        CHECK_EQUAL(2,h.calls().size());
         CHECK_EQUAL
         (call("WaitForSingleObject",(HANDLE)0x12,1000),h.calls().at(0));
+        CHECK_EQUAL
+        (call("WaitForSingleObject",(HANDLE)0x12,2000),h.calls().at(1));
     });
     sand_box([] ()
     {
