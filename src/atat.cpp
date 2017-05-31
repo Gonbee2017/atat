@@ -212,9 +212,9 @@ namespace atat
 
     Row::Row(const string&description_):description_(description_)
     {
-        string::size_type shrpos=description_.find_first_of('#');
-        if(shrpos==string::npos) shrpos=description_.length();
-        tokens_=tokenize(description_.substr(0,shrpos)," \t");
+        string::size_type pndpos=description_.find_first_of('#');
+        if(pndpos==string::npos) pndpos=description_.length();
+        tokens_=tokenize(description_.substr(0,pndpos)," \t");
     }
 
     const string&Row::description() {return description_;}
