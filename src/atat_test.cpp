@@ -2785,11 +2785,11 @@ TEST(free,run)
     });
 }
 
-TEST(free,setup_io)
+TEST(free,setup_detours)
 {
     sand_box([] ()
     {
-        setup_io();
+        setup_detours();
         POINTERS_EQUAL
         (
             ::CloseHandle,

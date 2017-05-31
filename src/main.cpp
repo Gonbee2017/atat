@@ -6,6 +6,6 @@ using namespace std;
 
 int main(int argc,char**argv)
 {
-    setup_io();
+    setup_detours();
     return run(argc,argv,cin,cout,cerr);
 }

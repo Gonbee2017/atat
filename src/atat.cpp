@@ -876,7 +876,7 @@ namespace atat
         return result;
     }
 
-    void setup_io()
+    void setup_detours()
     {
         atat::CloseHandle=::CloseHandle;
         atat::CreateEvent=::CreateEvent;

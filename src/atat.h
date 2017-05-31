@@ -255,7 +255,7 @@ namespace atat
     vector<shared_ptr<Command>> parse_script(istream&is);
     map<string,string>&properties();
     int run(int argc,char**argv,istream&in,ostream&out,ostream&err);
-    void setup_io();
+    void setup_detours();
     vector<string> tokenize(const string&str,const string&delimiters);
     void wait(const DWORD&time);
     void wait_active();
