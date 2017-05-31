@@ -240,20 +240,17 @@ TEST(KeyCommand,construct)
     sand_box([] ()
     {
         auto l=make_shared<Line>("key down A");
-        try {auto kdc=make_shared<KeyDownCommand>(l);}
-        catch(const runtime_error&e) {FAIL("Don't pass here.");}
+        auto kdc=make_shared<KeyDownCommand>(l);
     });
     sand_box([] ()
     {
         auto l=make_shared<Line>("key down  a\t");
-        try {auto kdc=make_shared<KeyDownCommand>(l);}
-        catch(const runtime_error&e) {FAIL("Don't pass here.");}
+        auto kdc=make_shared<KeyDownCommand>(l);
     });
     sand_box([] ()
     {
         auto l=make_shared<Line>("key down B");
-        try {auto kdc=make_shared<KeyDownCommand>(l);}
-        catch(const runtime_error&e) {FAIL("Don't pass here.");}
+        auto kdc=make_shared<KeyDownCommand>(l);
     });
 }
 
@@ -775,14 +772,12 @@ TEST(MouseButtonCommand,construct)
     sand_box([] ()
     {
         auto l=make_shared<Line>("mouse left down");
-        try {auto mbdc=make_shared<MouseButtonDownCommand>(l);}
-        catch(const runtime_error&e) {FAIL("Don't pass here.");}
+        auto mbdc=make_shared<MouseButtonDownCommand>(l);
     });
     sand_box([] ()
     {
         auto l=make_shared<Line>("mouse right up");
-        try {auto mbuc=make_shared<MouseButtonUpCommand>(l);}
-        catch(const runtime_error&e) {FAIL("Don't pass here.");}
+        auto mbuc=make_shared<MouseButtonUpCommand>(l);
     });
 }
 
