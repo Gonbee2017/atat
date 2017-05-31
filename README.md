@@ -63,10 +63,10 @@ End the loop block.
 ## EXAMPLE
 
 ### HOW TO WRITE?
-At the command prompt, type:
-`$ atat target=GAME`
+At the command prompt, type:<br/>
+`$ atat target=GAME`<br/>
 Since ATAT is waiting for input, it does as follows.
-<code>
+<pre>
 sleep 3000
 mouse move 100 200
 mouse left click
@@ -74,7 +74,7 @@ loop begin 5
     key press A
     key press B
 loop end
-</code>
+</pre>
 
 ### HOW IT WORKS?
 First, wait 3 seconds,
