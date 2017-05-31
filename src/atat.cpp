@@ -141,7 +141,7 @@ namespace atat
             {lower_case("CIRCUMFLEX"),  0x90},
             {lower_case("AT"),          0x91},
             {lower_case("COLON"),       0x92},
-            {lower_case("UNDERrow"),   0x93},
+            {lower_case("UNDERLINE"),   0x93},
             {lower_case("KANJI"),       0x94},
             {lower_case("STOP"),        0x95},
             {lower_case("AX"),          0x96},
