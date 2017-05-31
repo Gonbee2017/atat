@@ -342,7 +342,7 @@ TEST(KeyCommand,send)
             [&] (HANDLE hHandle,DWORD dwMilliseconds)->DWORD
             {return WAIT_TIMEOUT;};
         Context::instance()=make_shared<Context>();
-        auto r=make_shared<Row>("key down B");
+        auto r=make_shared<Row>("key up B");
         auto kuc=make_shared<KeyUpCommand>(r);
         kuc->execute();
         CHECK_EQUAL(1,h.calls().size());
@@ -1277,7 +1277,7 @@ TEST(MouseMoveCommand,execute)
         try
         {
             mmc->execute();
-            FAIL("Don't pass here");
+            FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("function:'GetSystemMetrics':failed",e.what());}
         CHECK_EQUAL(1,h.calls().size());
@@ -1309,7 +1309,7 @@ TEST(MouseMoveCommand,execute)
                     result=0;
                     break;
                 default:
-                    FAIL("Don't pass here");
+                    FAIL("Don't pass here.");
                 };
                 return result;
             };
@@ -1319,7 +1319,7 @@ TEST(MouseMoveCommand,execute)
         try
         {
             mmc->execute();
-            FAIL("Don't pass here");
+            FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("function:'GetSystemMetrics':failed",e.what());}
         CHECK_EQUAL(2,h.calls().size());
@@ -1352,7 +1352,7 @@ TEST(MouseMoveCommand,execute)
                     result=300;
                     break;
                 default:
-                    FAIL("Don't pass here");
+                    FAIL("Don't pass here.");
                 };
                 return result;
             };
@@ -1485,7 +1485,7 @@ TEST(MouseMoveCommand,execute)
                     result=300;
                     break;
                 default:
-                    FAIL("Don't pass here");
+                    FAIL("Don't pass here.");
                 };
                 return result;
             };
@@ -1588,7 +1588,7 @@ TEST(MouseMoveCommand,execute)
                     result=300;
                     break;
                 default:
-                    FAIL("Don't pass here");
+                    FAIL("Don't pass here.");
                 };
                 return result;
             };
@@ -2611,7 +2611,7 @@ TEST(free,run)
                     result=WAIT_OBJECT_0;
                     break;
                 default:
-                    FAIL("Don't pass here");
+                    FAIL("Don't pass here.");
                 };
                 return result;
             };
@@ -3036,7 +3036,7 @@ TEST(free,wait_active)
                     w=(HWND)0x56;
                     break;
                 default:
-                    FAIL("Don't pass here");
+                    FAIL("Don't pass here.");
                 };
                 return w;
             };
