@@ -1,5 +1,6 @@
 #include<algorithm>
 #include"atat.h"
+#include<cctype>
 #include<cstdlib>
 
 namespace atat
@@ -8,26 +9,44 @@ namespace atat
 
     Row*Command::row() {return row_.get();}
 
-    Context::Context():frames_({{0,0,0}}),index_(0)
+    void context::setup()
     {
-        abortedEvent_=make_shared<SystemObject>
-        (atat::CreateEvent(NULL,TRUE,FALSE,NULL));
-        if(abortedEvent_->handle()==NULL)
-            throw runtime_error(describe
-            ("function:'CreateEvent':failed(",GetLastError(),")"));
+        CloseHandle=::CloseHandle;
+        CreateEvent=::CreateEvent;
+        FindWindowW=::FindWindowW;
+        GetDoubleClickTime=::GetDoubleClickTime;
+        GetForegroundWindow=::GetForegroundWindow;
+        GetLastError=::GetLastError;
+        GetSystemMetrics=::GetSystemMetrics;
+        GetWindowRect=::GetWindowRect;
+        SendInput=::SendInput;
+        SetConsoleCtrlHandler=::SetConsoleCtrlHandler;
+        SetEvent=::SetEvent;
+        WaitForSingleObject=::WaitForSingleObject;
+
+        err=&cerr;
+        in=&cin;
+        out=&cout;
     }
 
-    const HANDLE&Context::abortedEvent() {return abortedEvent_->handle();}
+    Event::Event()
+    {
+        handle_=ct().CreateEvent(NULL,TRUE,FALSE,NULL);
+        if(handle_==NULL)
+            throw runtime_error(describe
+            ("function:'CreateEvent':failed(",ct().GetLastError(),")"));
+    }
 
-    vector<frame>&Context::frames() {return frames_;}
+    Event::~Event() {ct().CloseHandle(handle_);}
 
-    size_t&Context::index() {return index_;}
+    const HANDLE&Event::handle() {return handle_;}
 
-    shared_ptr<Context>&Context::instance() {return instance_;}
-
-    map<string,string>&Context::properties() {return properties_;}
-
-    shared_ptr<Context> Context::instance_;
+    void Event::set()
+    {
+        if(ct().SetEvent(handle_)==FALSE)
+            throw runtime_error(describe
+            ("function:'SetEvent':failed(",ct().GetLastError(),")"));
+    }
 
     KeyCommand::KeyCommand(const shared_ptr<Row>&row_):Command(row_)
     {
@@ -174,9 +193,9 @@ namespace atat
         input.ki.dwFlags=KEYEVENTF_SCANCODE|up;
         input.ki.time=0;
         input.ki.dwExtraInfo=0;
-        if(atat::SendInput(1,&input,sizeof(INPUT))!=1)
+        if(ct().SendInput(1,&input,sizeof(INPUT))!=1)
             throw runtime_error(describe
-            ("function:'SendInput':failed(",GetLastError(),")"));
+            ("function:'SendInput':failed(",ct().GetLastError(),")"));
     }
 
     KeyDownCommand::KeyDownCommand(const shared_ptr<Row>&row_):
@@ -185,8 +204,8 @@ namespace atat
     void KeyDownCommand::execute()
     {
         send(code_,0);
-        wait(atat::GetDoubleClickTime()/2);
-        Context::instance()->index()++;
+        wait(ct().GetDoubleClickTime()/2);
+        ct().index++;
     }
 
     KeyPressCommand::KeyPressCommand(const shared_ptr<Row>&row_):
@@ -195,19 +214,20 @@ namespace atat
     void KeyPressCommand::execute()
     {
         send(code_,0);
-        wait(atat::GetDoubleClickTime()/2);
+        wait(ct().GetDoubleClickTime()/2);
         send(code_,KEYEVENTF_KEYUP);
-        wait(atat::GetDoubleClickTime()/2);
-        Context::instance()->index()++;
+        wait(ct().GetDoubleClickTime()/2);
+        ct().index++;
     }
 
-    KeyUpCommand::KeyUpCommand(const shared_ptr<Row>&row_):KeyCommand(row_) {}
+    KeyUpCommand::KeyUpCommand(const shared_ptr<Row>&row_):
+        KeyCommand(row_) {}
 
     void KeyUpCommand::execute()
     {
         send(code_,KEYEVENTF_KEYUP);
-        wait(atat::GetDoubleClickTime()/2);
-        Context::instance()->index()++;
+        wait(ct().GetDoubleClickTime()/2);
+        ct().index++;
     }
 
     Row::Row(const string&description_):description_(description_)
@@ -227,10 +247,10 @@ namespace atat
     void MouseButtonClickCommand::execute()
     {
         send(0,0,0,button_);
-        wait(atat::GetDoubleClickTime()/2);
+        wait(ct().GetDoubleClickTime()/2);
         send(0,0,0,button_<<1);
-        wait(atat::GetDoubleClickTime()/2);
-        Context::instance()->index()++;
+        wait(ct().GetDoubleClickTime()/2);
+        ct().index++;
     }
 
     MouseButtonCommand::MouseButtonCommand(const shared_ptr<Row>&row_):
@@ -256,11 +276,11 @@ namespace atat
         for(size_t i=0;i<2;i++)
         {
             send(0,0,0,button_);
-            wait(atat::GetDoubleClickTime()/4);
+            wait(ct().GetDoubleClickTime()/4);
             send(0,0,0,button_<<1);
-            wait(atat::GetDoubleClickTime()/4);
+            wait(ct().GetDoubleClickTime()/4);
         }
-        Context::instance()->index()++;
+        ct().index++;
     }
 
     MouseButtonDownCommand::MouseButtonDownCommand
@@ -269,8 +289,8 @@ namespace atat
     void MouseButtonDownCommand::execute()
     {
         send(0,0,0,button_);
-        wait(atat::GetDoubleClickTime()/2);
-        Context::instance()->index()++;
+        wait(ct().GetDoubleClickTime()/2);
+        ct().index++;
     }
 
     MouseButtonUpCommand::MouseButtonUpCommand(const shared_ptr<Row>&row_):
@@ -279,8 +299,8 @@ namespace atat
     void MouseButtonUpCommand::execute()
     {
         send(0,0,0,button_<<1);
-        wait(atat::GetDoubleClickTime()/2);
-        Context::instance()->index()++;
+        wait(ct().GetDoubleClickTime()/2);
+        ct().index++;
     }
 
     void MouseCommand::send
@@ -299,9 +319,9 @@ namespace atat
         input.mi.dwFlags=buttonAndAction;
         input.mi.time=0;
         input.mi.dwExtraInfo=0;
-        if(atat::SendInput(1,&input,sizeof(INPUT))!=1)
+        if(ct().SendInput(1,&input,sizeof(INPUT))!=1)
             throw runtime_error(describe
-            ("function:'SendInput':failed(",GetLastError(),")"));
+            ("function:'SendInput':failed(",ct().GetLastError(),")"));
     }
 
     MouseMoveCommand::MouseMoveCommand(const shared_ptr<Row>&row_):
@@ -318,24 +338,28 @@ namespace atat
     {
         RECT targetRect;
         targetRect.left=targetRect.top=0;
-        if(properties().find("target")!=properties().end())
+        if(ct().properties.find("target")!=ct().properties.end())
         {
-            if(atat::GetWindowRect(find_target(),&targetRect)==FALSE)
+            if(ct().GetWindowRect(find_target(),&targetRect)==FALSE)
                 throw runtime_error(describe
-                ("function:'GetWindowRect':failed(",GetLastError(),")"));
+                (
+                    "function:'GetWindowRect':failed(",
+                    ct().GetLastError(),
+                    ")"
+                ));
         }
-        int screenWidth=atat::GetSystemMetrics(SM_CXSCREEN);
+        int screenWidth=ct().GetSystemMetrics(SM_CXSCREEN);
         if(screenWidth==0)
             throw runtime_error(describe
             ("function:'GetSystemMetrics':failed"));
-        int screenHeight=atat::GetSystemMetrics(SM_CYSCREEN);
+        int screenHeight=ct().GetSystemMetrics(SM_CYSCREEN);
         if(screenHeight==0)
             throw runtime_error(describe
             ("function:'GetSystemMetrics':failed"));
         LONG mouseX=((x_+targetRect.left)<<16)/screenWidth;
         LONG mouseY=((y_+targetRect.top)<<16)/screenHeight;
         send(mouseX,mouseY,0,MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE);
-        Context::instance()->index()++;
+        ct().index++;
     }
 
     MouseWheelCommand::MouseWheelCommand(const shared_ptr<Row>&row_):
@@ -350,12 +374,12 @@ namespace atat
     void MouseWheelCommand::execute()
     {
         send(0,0,(DWORD)amount_,MOUSEEVENTF_WHEEL);
-        Context::instance()->index()++;
+        ct().index++;
     }
 
     NullCommand::NullCommand(const shared_ptr<Row>&row_):Command(row_){}
 
-    void NullCommand::execute() {Context::instance()->index()++;}
+    void NullCommand::execute() {ct().index++;}
 
     LoopBeginCommand::LoopBeginCommand(const shared_ptr<Row>&row_):
         Command(row_)
@@ -370,8 +394,8 @@ namespace atat
 
     void LoopBeginCommand::execute()
     {
-        Context::instance()->frames().push_back
-        ({0,++Context::instance()->index(),number_});
+        ct().index++;
+        frame_begin(number_);
     }
 
     LoopEndCommand::LoopEndCommand(const shared_ptr<Row>&row_):Command(row_)
@@ -383,17 +407,10 @@ namespace atat
 
     void LoopEndCommand::execute()
     {
-        vector<frame>&frames=Context::instance()->frames();
-        if
-        (
-            frames.back().number==0||
-            ++frames.back().counter<frames.back().number
-        ) Context::instance()->index()=frames.back().entry;
-        else
-        {
-            Context::instance()->index()++;
-            frames.pop_back();
-        }
+        if(ct().frames.size()==1)
+            throw runtime_error(describe
+            ("loop end:no corresponding begin"));
+        if(!frame_end()) ct().index++;
     }
 
     SleepCommand::SleepCommand(const shared_ptr<Row>&row_):Command(row_)
@@ -407,37 +424,198 @@ namespace atat
     void SleepCommand::execute()
     {
         wait(time_);
-        Context::instance()->index()++;
+        ct().index++;
     }
-
-    SystemObject::SystemObject(HANDLE handle_):handle_(handle_) {}
-
-    SystemObject::~SystemObject()
-    {if(handle_!=NULL) atat::CloseHandle(handle_);}
-
-    const HANDLE&SystemObject::handle() {return handle_;}
 
     BOOL control_key_pressed(DWORD type)
     {
         BOOL handled=FALSE;
         if(type==CTRL_C_EVENT)
         {
-            atat::SetEvent(Context::instance()->abortedEvent());
-            handled=TRUE;
+            try
+            {
+                ct().canceled_event->set();
+                handled=TRUE;
+            } catch (const runtime_error&error)
+            {
+                (*ct().err)<<describe
+                ("error(",ct().index,"):",error.what())<<endl;
+            }
         }
         return handled;
     }
 
+    context&ct()
+    {
+        static context context_;
+        return context_;
+    }
+
+    int execute(int argc,char**argv)
+    {
+        int result=0;
+        try
+        {
+            ct().properties=parse_properties(argc,argv);
+            if(ct().properties.find("help")!=ct().properties.end())
+            {
+                (*ct().out)<<describe
+                (
+"usage:",argv[0]," [property[=VALUE]...]\n"
+"\n"
+"WHAT IS ATAT?\n"
+"    ATAT is an interpreter for automatically manipulating\n"
+"    keyboard and mouse on Windows.\n"
+"    ATAT reads the script from standard input.\n"
+"    The script is described as a list of commands.\n"
+"    Basically, one operation is executed with one command.\n"
+"    The list of commands are executed in order from the top,\n"
+"    and when it runs to the bottom, it ends.\n"
+"    Press Ctrl-C to exit while running.\n"
+"\n"
+"PROPERTIES\n"
+"    Properties are specified by command row arguments.\n"
+"    Specify a name and if it has a value, connect with an equals.\n"
+"    In the following list, a name is indicated in lowercase,\n"
+"    and a value is indicated in uppercase.\n"
+"    \n"
+"    help\n"
+"        Show this document, and finish without doing anything.\n"
+"    ready=TIME\n"
+"        Wait for ready before running.\n"
+"        TIME is time to wait in milliseconds.\n"
+"    repeat[=NUMBER]\n"
+"        Repeat the script.\n"
+"        NUMBER is number of repetition.\n"
+"        If it's not specified, it's infinite.\n"
+"    silent\n"
+"        Don't show the commands to be executed.\n"
+"    target=CAPTION\n"
+"        CAPTION is the caption of the target window.\n"
+"        Execute the command when this window is active.\n"
+"        Also, specify the relative coordinates of this window\n"
+"        in 'mouse move' command.\n"
+"        If it's not specified, execute the command any window active.\n"
+"\n"
+"COMMANDS\n"
+"    Command consists of switches followed by parameters.\n"
+"    Separete switches and parameters with spaces or tabs.\n"
+"    In the following list, switches are indicated in lowercase,\n"
+"    and parameters are indicated in uppercase.\n"
+"    Also, if there're multiple choices on the switch,\n"
+"    separate them with vertical bars.\n"
+"    \n"
+"    key down|up|press KEY\n"
+"        Down or up or both the key on the keyboard.\n"
+"        KEY is the key to be operated.\n"
+"        Specify a string following 'DIK_' defined in DirectInput.\n"
+"    mouse move X Y\n"
+"        Move the mouse.\n"
+"        X and Y are the coordinates to move the mouse.\n"
+"        If target is specified, assumed to be its relative coordinates.\n"
+"    mouse wheel AMOUNT\n"
+"        Wheel the mouse.\n"
+"        AMOUNT is the amount to wheel the mouse.\n"
+"    mouse left|right|middle down|up|click|doubleclick\n"
+"        Down or up or click or double click\n"
+"        the left or right or middle button of the mouse.\n"
+"    sleep TIME\n"
+"        Do nothing for a while.\n"
+"        TIME is time to wait in milliseconds.\n"
+"    loop begin [NUMBER]\n"
+"        Begin the loop block.\n"
+"        NUMBER is number of loops. If it's not specified, it's infinite.\n"
+"    loop end\n"
+"        End the loop block.\n"
+"\n"
+"EXAMPLE\n"
+"    How to write?\n"
+"        At the command prompt, type:$ atat target=GAME\n"
+"        Since ATAT is waiting for input, it does as follows.\n"
+"            sleep 3000\n"
+"            mouse move 100 200\n"
+"            mouse left click\n"
+"            loop begin 5\n"
+"                key press A\n"
+"                key press B\n"
+"            loop end\n"
+"    How it works?\n"
+"        First, wait 3 seconds,\n"
+"        and then move the mouse pointer to (100,200) in the GAME window.\n"
+"        Next, click the left mouse button.\n"
+"        Then enter the loop block, press the A key, then press the B key.\n"
+"        Return to the beginning of the loop block,\n"
+"        and repeat the A and B five times.\n"
+"        If the GAME window becomes inactive halfway,\n"
+"        execution will be paused.\n"
+"        When it becomes active again, execution resumes.\n"
+"\n"
+"REMARKS\n"
+"    Number format\n"
+"        Follow the literal syntax for number in C.\n"
+"        So, it's octal if it starts with '0',\n"
+"        or hexadecimal if it starts with '0x', otherwise decimal.\n"
+"    Comment\n"
+"        Script can contains comments, for example:\n"
+"            # Script01 to earn experience.\n"
+"            \n"
+"            # Wait for ready.\n"
+"            sleep 3000\n"
+"            \n"
+"            # Repeat infinitely.\n"
+"            loop begin\n"
+"                key press TAB # Target an enemy.\n"
+"                key press 1   # Attack the target.\n"
+"            loop end\n"
+"        The string following the '#' is treated as a comment.\n"
+"        Also, empty rows just skip.\n"
+                );
+            } else
+            {
+                ct().canceled_event=make_shared<Event>();
+                if
+                (
+                    ct().SetConsoleCtrlHandler
+                    ((PHANDLER_ROUTINE)control_key_pressed,TRUE)==FALSE
+                )
+                    throw runtime_error(describe
+                    (
+                        "function:'SetConsoleCtrlHandler':"
+                        "failed(",ct().GetLastError(),")"
+                    ));
+                run(parse_script());
+            }
+        } catch(const runtime_error&error)
+        {
+            (*ct().err)<<describe
+            ("error(",ct().index,"):",error.what())<<endl;
+            result=1;
+        } catch(const canceled_exception&) {}
+        return result;
+    }
+
     HWND find_target()
     {
-        if(properties().find("target")==properties().end())
+        if(ct().properties.find("target")==ct().properties.end())
             throw runtime_error(describe("property:'target':not found"));
-        HWND window=atat::FindWindowW
-        (NULL,multi_to_wide(properties().at("target"),CP_UTF8).get());
+        HWND window=ct().FindWindowW
+        (NULL,multi_to_wide(ct().properties.at("target"),CP_UTF8).get());
         if(window==NULL)
             throw runtime_error(describe
-            ("target:'",properties().at("target"),"':not found"));
+            ("target:'",ct().properties.at("target"),"':not found"));
         return window;
+    }
+
+    void frame_begin(const size_t&number)
+    {ct().frames.push_back({0,ct().index,number});}
+
+    bool frame_end()
+    {
+        bool return_=ct().frames.back().number==0||
+            ++ct().frames.back().counter<ct().frames.back().number;
+        if(return_) ct().index=ct().frames.back().entry;
+        else ct().frames.pop_back();
+        return return_;
     }
 
     string lower_case(const string&source)
@@ -454,8 +632,7 @@ namespace atat
         return destination;
     }
 
-    shared_ptr<wchar_t> multi_to_wide
-    (const string&str,const UINT&codePage)
+    shared_ptr<wchar_t> multi_to_wide(const string&str,const UINT&codePage)
     {
         int length=MultiByteToWideChar
         (
@@ -468,7 +645,11 @@ namespace atat
         );
         if(length==0)
             throw runtime_error(describe
-            ("function:'MultiByteToWideChar':failed(",GetLastError(),")"));
+            (
+                "function:'MultiByteToWideChar':failed(",
+                ct().GetLastError(),
+                ")"
+            ));
         shared_ptr<wchar_t> utf16
         (new wchar_t[length],default_delete<wchar_t[]>());
         if
@@ -484,7 +665,11 @@ namespace atat
             )!=length
         )
             throw runtime_error(describe
-            ("function:'MultiByteToWideChar':failed(",GetLastError(),")"));
+            (
+                "function:'MultiByteToWideChar':failed(",
+                ct().GetLastError(),
+                ")"
+            ));
         return utf16;
     }
 
@@ -513,24 +698,24 @@ namespace atat
 
     map<string,string> parse_properties(int argc,char**argv)
     {
-        map<string,string> properties_;
-         for(size_t i=1;i<argc;i++)
-         {
-             string argument=argv[i];
-             string::size_type eqpos=argument.find('=');
-             string name,value;
-             if(eqpos==string::npos) name=argument;
-             else
-             {
-                 name=lower_case(argument.substr(0,eqpos));
-                 value=argument.substr(eqpos+1);
-             }
-             properties_.insert(make_pair(name,value));
-         }
-         return properties_;
+        map<string,string> properties;
+        for(size_t i=1;i<argc;i++)
+        {
+            string argument=argv[i];
+            string::size_type eqpos=argument.find('=');
+            string name,value;
+            if(eqpos==string::npos) name=argument;
+            else
+            {
+                name=lower_case(argument.substr(0,eqpos));
+                value=argument.substr(eqpos+1);
+            }
+            properties.insert(make_pair(name,value));
+        }
+        return properties;
     }
 
-    vector<shared_ptr<Command>> parse_script(istream&is)
+    vector<shared_ptr<Command>> parse_script()
     {
         static map<string,COMMAND_FACTORY> keyCommandFactories(
         {
@@ -639,12 +824,7 @@ namespace atat
         });
         vector<shared_ptr<Command>> commands;
         string description;
-        for
-        (
-            Context::instance()->index()=0;
-            getline(is,description);
-            Context::instance()->index()++
-        )
+        for(ct().index=0;getline(*ct().in,description);ct().index++)
         {
             auto row=make_shared<Row>(description);
             commands.push_back(new_command(commandFactories,row,0));
@@ -652,181 +832,39 @@ namespace atat
         return commands;
     }
 
-    map<string,string>&properties()
-    {return Context::instance()->properties();}
-
-    int run(int argc,char**argv,istream&in,ostream&out,ostream&err)
+    void run(const vector<shared_ptr<Command>>&commands)
     {
-        int result=0;
-        try
+        ct().index=0;
+        if(ct().properties.find("ready")!=ct().properties.end())
+             wait(to_number(ct().properties.at("ready")));
+        size_t number=1;
+        if(ct().properties.find("repeat")!=ct().properties.end())
+             number=to_number(ct().properties.at("repeat"));
+        frame_begin(number);
+        do
         {
-            Context::instance()=make_shared<Context>();
-            properties()=parse_properties(argc,argv);
-            if(properties().find("help")!=properties().end())
+            while(ct().index<commands.size())
             {
-                out<<describe
-                (
-"usage:",argv[0]," [property[=VALUE]...]\n"
-"\n"
-"WHAT IS ATAT?\n"
-"    ATAT is an interpreter for automatically manipulating\n"
-"    keyboard and mouse on Windows.\n"
-"    ATAT reads the script from standard input.\n"
-"    The script is described as a list of commands.\n"
-"    Basically, one operation is executed with one command.\n"
-"    The list of commands are executed in order from the top,\n"
-"    and when it runs to the bottom, it ends.\n"
-"    Press Ctrl-C to exit while running.\n"
-"\n"
-"PROPERTIES\n"
-"    Properties are specified by command row arguments.\n"
-"    Specify a name and if it has a value, connect with an equals.\n"
-"    In the following list, a name is indicated in lowercase,\n"
-"    and a value is indicated in uppercase.\n"
-"    \n"
-"    help\n"
-"        Show this document, and finish without doing anything.\n"
-"    silent\n"
-"        Don't show the commands to be executed.\n"
-"    target=CAPTION\n"
-"        CAPTION is the caption of the target window.\n"
-"        Execute the command when this window is active.\n"
-"        Also, specify the relative coordinates of this window\n"
-"        in 'mouse move' command.\n"
-"        If it's not specified, execute the command any window active.\n"
-"\n"
-"COMMANDS\n"
-"    Command consists of switches followed by parameters.\n"
-"    Separete switches and parameters with spaces or tabs.\n"
-"    In the following list, switches are indicated in lowercase,\n"
-"    and parameters are indicated in uppercase.\n"
-"    Also, if there're multiple choices on the switch,\n"
-"    separate them with vertical bars.\n"
-"    \n"
-"    key down|up|press KEY\n"
-"        Down or up or both the key on the keyboard.\n"
-"        KEY is the key to be operated.\n"
-"        Specify a string following 'DIK_' defined in DirectInput.\n"
-"    mouse move X Y\n"
-"        Move the mouse.\n"
-"        X and Y are the coordinates to move the mouse.\n"
-"        If target is specified, assumed to be its relative coordinates.\n"
-"    mouse wheel AMOUNT\n"
-"        Wheel the mouse.\n"
-"        AMOUNT is the amount to wheel the mouse.\n"
-"    mouse left|right|middle down|up|click|doubleclick\n"
-"        Down or up or click or double click\n"
-"        the left or right or middle button of the mouse.\n"
-"    sleep TIME\n"
-"        Do nothing for a while.\n"
-"        TIME is time to wait in milliseconds.\n"
-"    loop begin [NUMBER]\n"
-"        Begin the loop block.\n"
-"        NUMBER is number of loops. If it's not specified, it's infinite.\n"
-"    loop end\n"
-"        End the loop block.\n"
-"\n"
-"EXAMPLE\n"
-"    How to write?\n"
-"        At the command prompt, type:$ atat target=GAME\n"
-"        Since ATAT is waiting for input, it does as follows.\n"
-"            sleep 3000\n"
-"            mouse move 100 200\n"
-"            mouse left click\n"
-"            loop begin 5\n"
-"                key press A\n"
-"                key press B\n"
-"            loop end\n"
-"    How it works?\n"
-"        First, wait 3 seconds,\n"
-"        and then move the mouse pointer to (100,200) in the GAME window.\n"
-"        Next, click the left mouse button.\n"
-"        Then enter the loop block, press the A key, then press the B key.\n"
-"        Return to the beginning of the loop block,\n"
-"        and repeat the A and B five times.\n"
-"        If the GAME window becomes inactive halfway,\n"
-"        execution will be paused.\n"
-"        When it becomes active again, execution resumes.\n"
-"\n"
-"REMARKS\n"
-"    Number format\n"
-"        Follow the literal notation in C.\n"
-"        So, it's octal if it starts with '0',\n"
-"        or hexadecimal if it starts with '0x', otherwise decimal.\n"
-"    Comment\n"
-"        Script can contains comments, for example:\n"
-"            # Script01 to earn experience.\n"
-"            \n"
-"            # Wait for ready.\n"
-"            sleep 3000\n"
-"            \n"
-"            # Repeat infinitely.\n"
-"            loop begin\n"
-"                key press TAB # Target an enemy.\n"
-"                key press 1   # Attack the target.\n"
-"            loop end\n"
-"        The string following the '#' is treated as a comment.\n"
-"        Also, empty rows just skip.\n"
-                );
-            } else
-            {
-                if
-                (
-                    atat::SetConsoleCtrlHandler
-                    ((PHANDLER_ROUTINE)control_key_pressed,TRUE)==FALSE
-                )
-                    throw runtime_error(describe
-                    (
-                        "function:'SetConsoleCtrlHandler':"
-                        "failed(",GetLastError(),")"
-                    ));
-                vector<shared_ptr<Command>> commands=parse_script(in);
-                for
-                (
-                    Context::instance()->index()=0;
-                    Context::instance()->index()<commands.size();
-                )
-                {
-                    wait_active();
-                    auto command=commands.at(Context::instance()->index());
-                    if(properties().find("silent")==properties().end())
-                        out<<command->row()->description()<<endl;
-                    command->execute();
-                }
+                wait_active();
+                auto command=commands.at(ct().index);
+                if(ct().properties.find("silent")==ct().properties.end())
+                    (*ct().out)<<command->row()->description()<<endl;
+                command->execute();
             }
-        } catch(const runtime_error&error)
-        {
-            err<<describe
-            (
-                "error(",Context::instance()->index(),"):",
-                error.what()
-            )<<endl;
-            result=1;
-        } catch(const aborted_exception&) {}
-        return result;
-    }
-
-    void setup_detours()
-    {
-        atat::CloseHandle=::CloseHandle;
-        atat::CreateEvent=::CreateEvent;
-        atat::FindWindowW=::FindWindowW;
-        atat::GetDoubleClickTime=::GetDoubleClickTime;
-        atat::GetForegroundWindow=::GetForegroundWindow;
-        atat::GetLastError=::GetLastError;
-        atat::GetSystemMetrics=::GetSystemMetrics;
-        atat::GetWindowRect=::GetWindowRect;
-        atat::SendInput=::SendInput;
-        atat::SetConsoleCtrlHandler=::SetConsoleCtrlHandler;
-        atat::SetEvent=::SetEvent;
-        atat::WaitForSingleObject=::WaitForSingleObject;
+            if(ct().frames.size()!=1)
+            {
+                ct().index=ct().frames.back().entry-1;
+                throw runtime_error(describe
+                ("loop begin:no corresponding end"));
+            }
+        } while(frame_end());
     }
 
     long to_number(const string&str)
     {
         char*end;
         long number=strtol(str.c_str(),&end,0);
-        if(str.empty()||*end)
+        if(*end)
             throw runtime_error(describe
             ("number:'",str.c_str(),"':invalid format"));
         return number;
@@ -835,46 +873,37 @@ namespace atat
     vector<string> tokenize(const string&str,const string&delimiters)
     {
         vector<string> tokens;
-        for(string::size_type delpos=0;delpos<=str.length();)
+        for(string::size_type dlmpos=0;dlmpos<=str.length();)
         {
-            string::size_type found=str.find_first_of(delimiters,delpos);
+            string::size_type found=str.find_first_of(delimiters,dlmpos);
             if(found==string::npos) found=str.length();
-            if(found!=delpos)
-                tokens.push_back(str.substr(delpos,found-delpos));
-            delpos=found+1;
+            if(found!=dlmpos)
+                tokens.push_back(str.substr(dlmpos,found-dlmpos));
+            dlmpos=found+1;
         }
         return tokens;
     }
 
     void wait(const DWORD&time)
     {
-        DWORD waitResult=atat::WaitForSingleObject
-        (Context::instance()->abortedEvent(),time);
+        DWORD waitResult=ct().WaitForSingleObject
+        (ct().canceled_event->handle(),time);
         if(waitResult==WAIT_FAILED)
             throw runtime_error(describe
-            ("function:'WaitForSingleObject':failed(",GetLastError(),")"));
-        if(waitResult==WAIT_OBJECT_0) throw aborted_exception();
+            (
+                "function:'WaitForSingleObject':failed(",
+                ct().GetLastError(),
+                ")"
+            ));
+        if(waitResult==WAIT_OBJECT_0) throw canceled_exception();
     }
 
     void wait_active()
     {
-        if(properties().find("target")!=properties().end())
+        if(ct().properties.find("target")!=ct().properties.end())
         {
-            while(find_target()!=atat::GetForegroundWindow())
-                wait(atat::GetDoubleClickTime());
+            while(find_target()!=ct().GetForegroundWindow())
+                wait(ct().GetDoubleClickTime());
         }
     }
-
-    function<BOOL(HANDLE)> CloseHandle;
-    function<HANDLE(LPSECURITY_ATTRIBUTES,BOOL,BOOL,LPCTSTR)> CreateEvent;
-    function<HWND(const wchar_t*,const wchar_t*)> FindWindowW;
-    function<UINT()> GetDoubleClickTime;
-    function<HWND()> GetForegroundWindow;
-    function<DWORD()> GetLastError;
-    function<int(int)> GetSystemMetrics;
-    function<BOOL(HWND,LPRECT)> GetWindowRect;
-    function<UINT(UINT,LPINPUT,int)> SendInput;
-    function<BOOL(PHANDLER_ROUTINE,BOOL)> SetConsoleCtrlHandler;
-    function<BOOL(HANDLE)> SetEvent;
-    function<DWORD(HANDLE,DWORD)> WaitForSingleObject;
 }

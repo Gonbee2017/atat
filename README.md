@@ -19,6 +19,13 @@ and a value is indicated in uppercase.
 
 * help<br/>
 Show this document, and finish without doing anything.
+* ready=<i>TIME</i><br/>
+Wait for ready before running.
+*TIME* is time to wait in milliseconds.
+* repeat[=<i>NUMBER</i>]<br/>
+Repeat the script.
+*NUMBER* is number of repetition.
+If it's not specified, it's infinite.
 * silent<br/>
 Don't show the commands to be executed.
 * target=<i>CAPTION</i><br/>
@@ -90,7 +97,7 @@ When it becomes active again, execution resumes.
 ## REMARKS
 
 ### Number format
-Follow the literal notation in C.
+Follow the literal syntax for number in C.
 So, it's octal if it starts with '0',
 or hexadecimal if it starts with '0x', otherwise decimal.
 

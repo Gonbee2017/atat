@@ -16,52 +16,17 @@ namespace atat
 {
     using namespace std;
 
-    struct aborted_exception;
-    class Context;
-    struct frame;
-    class KeyCommand;
-    class KeyDownCommand;
-    class KeyPressCommand;
-    class KeyUpCommand;
-    class LoopBeginCommand;
-    class LoopEndCommand;
-    class MouseButtonClickCommand;
-    class MouseButtonDoubleClickCommand;
-    class MouseButtonDownCommand;
-    class MouseButtonCommand;
-    class MouseButtonUpCommand;
-    class MouseCommand;
-    class MouseMoveCommand;
-    class MouseWheelCommand;
-    class NullCommand;
-    class Row;
-    class SleepCommand;
-    class SystemObject;
+    struct canceled_exception:public exception {};
 
-    struct aborted_exception:public exception {};
-
-    class Context
+    class Row
     {
     public:
-        Context();
-        const HANDLE&abortedEvent();
-        vector<frame>&frames();
-        size_t&index();
-        static shared_ptr<Context>&instance();
-        map<string,string>&properties();
+        Row(const string&description_);
+        const string&description();
+        const vector<string>&tokens();
     private:
-        shared_ptr<SystemObject> abortedEvent_;
-        vector<frame> frames_;
-        size_t index_;
-        static shared_ptr<Context> instance_;
-        map<string,string> properties_;
-    };
-
-    struct frame
-    {
-        size_t counter;
-        size_t entry;
-        size_t number;
+        string description_;
+        vector<string> tokens_;
     };
 
     class Command
@@ -73,6 +38,49 @@ namespace atat
         Command(const shared_ptr<Row>&row_);
     private:
         shared_ptr<Row> row_;
+    };
+
+    class Event
+    {
+    public:
+        Event();
+        ~Event();
+        const HANDLE&handle();
+        void set();
+    private:
+        HANDLE handle_;
+    };
+
+    struct frame
+    {
+        size_t counter;
+        size_t entry;
+        size_t number;
+    };
+
+    struct context
+    {
+        shared_ptr<Event> canceled_event;
+        function<BOOL(HANDLE)> CloseHandle;
+        function<HANDLE(LPSECURITY_ATTRIBUTES,BOOL,BOOL,LPCTSTR)>
+            CreateEvent;
+        ostream*err;
+        function<HWND(const wchar_t*,const wchar_t*)> FindWindowW;
+        vector<frame> frames;
+        function<UINT()> GetDoubleClickTime;
+        function<HWND()> GetForegroundWindow;
+        function<DWORD()> GetLastError;
+        function<int(int)> GetSystemMetrics;
+        function<BOOL(HWND,LPRECT)> GetWindowRect;
+        istream*in;
+        size_t index;
+        ostream*out;
+        map<string,string> properties;
+        function<UINT(UINT,LPINPUT,int)> SendInput;
+        function<BOOL(PHANDLER_ROUTINE,BOOL)> SetConsoleCtrlHandler;
+        function<BOOL(HANDLE)> SetEvent;
+        void setup();
+        function<DWORD(HANDLE,DWORD)> WaitForSingleObject;
     };
 
     class KeyCommand:public Command
@@ -102,17 +110,6 @@ namespace atat
     public:
         KeyUpCommand(const shared_ptr<Row>&row_);
         virtual void execute() override;
-    };
-
-    class Row
-    {
-    public:
-        Row(const string&description_);
-        const string&description();
-        const vector<string>&tokens();
-    private:
-        string description_;
-        vector<string> tokens_;
     };
 
     class LoopBeginCommand:public Command
@@ -214,34 +211,30 @@ namespace atat
         DWORD time_;
     };
 
-    class SystemObject
-    {
-    public:
-        SystemObject(HANDLE handle_);
-        ~SystemObject();
-        const HANDLE&handle();
-    private:
-        HANDLE handle_;
-    };
-
     using COMMAND_FACTORY=
         function<shared_ptr<Command>(const shared_ptr<Row>&row)>;
 
     BOOL control_key_pressed(DWORD type);
+    context&ct();
     template<class...ARGUMENTS> string describe(ARGUMENTS&&...arguments);
     template<class LEAD,class...TRAILER> void describe_to_with
     (
         ostream&os,
         const string&delimiter,
-        const LEAD&lead,
+        LEAD&lead,
         TRAILER&&...trailer
     );
     template<class ARGUMENT> void describe_to_with
-    (ostream&os,const string&delimiter,const ARGUMENT&argument);
+    (ostream&os,const string&delimiter,ARGUMENT&argument);
+    inline void describe_to_with
+    (ostream&os,const string&delimiter,const char*argument);
     inline string describe_to_with(ostream&os,const string&delimiter);
     template<class...ARGUMENTS> string describe_with
     (const string&delimiter,ARGUMENTS&&...arguments);
+    int execute(int argc,char**argv);
     HWND find_target();
+    void frame_begin(const size_t&number);
+    bool frame_end();
     string lower_case(const string&source);
     shared_ptr<wchar_t> multi_to_wide
     (const string&str,const UINT&codePage);
@@ -252,38 +245,21 @@ namespace atat
         const size_t&index
     );
     map<string,string> parse_properties(int argc,char**argv);
-    vector<shared_ptr<Command>> parse_script(istream&is);
-    map<string,string>&properties();
-    int run(int argc,char**argv,istream&in,ostream&out,ostream&err);
-    void setup_detours();
+    vector<shared_ptr<Command>> parse_script();
+    void run(const vector<shared_ptr<Command>>&commands);
     long to_number(const string&str);
     vector<string> tokenize(const string&str,const string&delimiters);
     void wait(const DWORD&time);
     void wait_active();
-
-    extern function<BOOL(HANDLE)> CloseHandle;
-    extern function<HANDLE(LPSECURITY_ATTRIBUTES,BOOL,BOOL,LPCTSTR)>
-        CreateEvent;
-    extern function<HWND(const wchar_t*,const wchar_t*)> FindWindowW;
-    extern function<UINT()> GetDoubleClickTime;
-    extern function<HWND()> GetForegroundWindow;
-    extern function<DWORD()> GetLastError;
-    extern function<int(int)> GetSystemMetrics;
-    extern function<BOOL(HWND,LPRECT)> GetWindowRect;
-    extern function<UINT(UINT,LPINPUT,int)> SendInput;
-    extern function<BOOL(PHANDLER_ROUTINE,BOOL)>
-        SetConsoleCtrlHandler;
-    extern function<BOOL(HANDLE)> SetEvent;
-    extern function<DWORD(HANDLE,DWORD)> WaitForSingleObject;
 
     template<class... ARGUMENTS> string describe(ARGUMENTS&&...arguments)
     {return describe_with("",arguments...);}
 
     template<class LEAD,class... TRAILER> void describe_to_with
     (
-        ostream &os,
+        ostream&os,
         const string&delimiter,
-        const LEAD &lead,
+        LEAD&lead,
         TRAILER&&...trailer
     )
     {
@@ -293,10 +269,13 @@ namespace atat
     }
 
     template<class ARGUMENT> void describe_to_with
-    (ostream &os,const string&delimiter,const ARGUMENT &argument)
-    {os<<argument;}
+    (ostream&os,const string&delimiter,ARGUMENT&argument) {os<<argument;}
 
-    inline string describe_to_with(ostream &os,const string&delimiter)
+    inline void describe_to_with
+    (ostream&os,const string&delimiter,const char*argument)
+    {if(argument!=nullptr) os<<argument;}
+
+    inline string describe_to_with(ostream&os,const string&delimiter)
     {return "";}
 
     template<class...ARGUMENTS> string describe_with
