@@ -60,11 +60,11 @@ namespace atat
 
     struct context
     {
-        shared_ptr<Event> canceled_event;
+        void setup();
+
         function<BOOL(HANDLE)> CloseHandle;
         function<HANDLE(LPSECURITY_ATTRIBUTES,BOOL,BOOL,LPCTSTR)>
             CreateEvent;
-        ostream*err;
         function<HWND(const wchar_t*,const wchar_t*)> FindWindowW;
         vector<frame> frames;
         function<UINT()> GetDoubleClickTime;
@@ -72,15 +72,17 @@ namespace atat
         function<DWORD()> GetLastError;
         function<int(int)> GetSystemMetrics;
         function<BOOL(HWND,LPRECT)> GetWindowRect;
+        function<UINT(UINT,LPINPUT,int)> SendInput;
+        function<BOOL(PHANDLER_ROUTINE,BOOL)> SetConsoleCtrlHandler;
+        function<BOOL(HANDLE)> SetEvent;
+        function<DWORD(HANDLE,DWORD)> WaitForSingleObject;
+
+        shared_ptr<Event> canceled_event;
+        ostream*err;
         istream*in;
         size_t index;
         ostream*out;
         map<string,string> properties;
-        function<UINT(UINT,LPINPUT,int)> SendInput;
-        function<BOOL(PHANDLER_ROUTINE,BOOL)> SetConsoleCtrlHandler;
-        function<BOOL(HANDLE)> SetEvent;
-        void setup();
-        function<DWORD(HANDLE,DWORD)> WaitForSingleObject;
     };
 
     class KeyCommand:public Command
