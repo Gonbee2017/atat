@@ -260,6 +260,68 @@ TEST(Event,destruct)
     });
 }
 
+TEST(Event,set)
+{
+    sand_box([] ()
+    {
+        history h;
+        ct().CreateEvent=
+            [&]
+            (
+                LPSECURITY_ATTRIBUTES lpEventAttributes,
+                BOOL bManualReset,
+                BOOL bInitialState,
+                LPCTSTR lpName
+            )->HANDLE {return (HANDLE)0x12;};
+        ct().SetEvent=
+            [&] (HANDLE hEvent)
+            {
+                h.calls().push_back(call("SetEvent",hEvent));
+                return FALSE;
+            };
+        ct().GetLastError=
+            [&] ()->DWORD
+            {
+                h.calls().push_back(call("GetLastError"));
+                return 34;
+            };
+        ct().CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
+        auto e=make_shared<Event>();
+        try
+        {
+            e->set();
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("function:'SetEvent':failed(34)",e.what());}
+        CHECK_EQUAL(2,h.calls().size());
+        CHECK_EQUAL(call("SetEvent",(HANDLE)0x12),h.calls().at(0));
+        CHECK_EQUAL(call("GetLastError"),h.calls().at(1));
+    });
+    sand_box([] ()
+    {
+        history h;
+        ct().CreateEvent=
+            [&]
+            (
+                LPSECURITY_ATTRIBUTES lpEventAttributes,
+                BOOL bManualReset,
+                BOOL bInitialState,
+                LPCTSTR lpName
+            )->HANDLE {return (HANDLE)0x12;};
+        ct().SetEvent=
+            [&] (HANDLE hEvent)
+            {
+                h.calls().push_back(call("SetEvent",hEvent));
+                return TRUE;
+            };
+        ct().CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
+        auto e=make_shared<Event>();
+        e->set();
+        CHECK_EQUAL(1,h.calls().size());
+        CHECK_EQUAL(call("SetEvent",(HANDLE)0x12),h.calls().at(0));
+    });
+}
+
 TEST_GROUP(KeyCommand) {};
 
 TEST(KeyCommand,construct)
@@ -2043,8 +2105,42 @@ TEST(free,control_key_pressed)
 {
     sand_box([] ()
     {
-        BOOL handled=control_key_pressed(CTRL_BREAK_EVENT);
-        CHECK_EQUAL(FALSE,handled);
+        CHECK_EQUAL(FALSE,control_key_pressed(CTRL_BREAK_EVENT));
+    });
+    sand_box([] ()
+    {
+        history h;
+        ct().CreateEvent=
+            [&]
+            (
+                LPSECURITY_ATTRIBUTES lpEventAttributes,
+                BOOL bManualReset,
+                BOOL bInitialState,
+                LPCTSTR lpName
+            )->HANDLE {return (HANDLE)0x12;};
+        ct().CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
+        ct().SetEvent=
+            [&] (HANDLE hEvent)->BOOL
+            {
+                h.calls().push_back(call("SetEvent",hEvent));
+                return FALSE;
+            };
+        ct().GetLastError=
+            [&] ()->DWORD
+            {
+                h.calls().push_back(call("GetLastError"));
+                return 34;
+            };
+        ct().canceled_event=make_shared<Event>();
+        ct().index=3;
+        ostringstream err;
+        ct().err=&err;
+        CHECK_EQUAL(FALSE,control_key_pressed(CTRL_C_EVENT));
+        CHECK_EQUAL
+        ("error(3):function:'SetEvent':failed(34)\n",err.str());
+        CHECK_EQUAL(2,h.calls().size());
+        CHECK_EQUAL(call("SetEvent",(HANDLE)0x12),h.calls().at(0));
+        CHECK_EQUAL(call("GetLastError"),h.calls().at(1));
     });
     sand_box([] ()
     {
@@ -2065,8 +2161,7 @@ TEST(free,control_key_pressed)
                 return TRUE;
             };
         ct().canceled_event=make_shared<Event>();
-        BOOL handled=control_key_pressed(CTRL_C_EVENT);
-        CHECK_EQUAL(TRUE,handled);
+        CHECK_EQUAL(TRUE,control_key_pressed(CTRL_C_EVENT));
         CHECK_EQUAL(1,h.calls().size());
         CHECK_EQUAL(call("SetEvent",(HANDLE)0x12),h.calls().at(0));
     });
