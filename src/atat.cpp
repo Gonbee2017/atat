@@ -50,7 +50,7 @@ namespace atat
 
     KeyCommand::KeyCommand(const shared_ptr<Row>&row_):Command(row_)
     {
-        if(row_->tokens().size()-1!=2)
+        if(row_->tokens().size()!=3)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
         string key=row_->tokens().at(2);
@@ -384,10 +384,10 @@ namespace atat
     LoopBeginCommand::LoopBeginCommand(const shared_ptr<Row>&row_):
         Command(row_)
     {
-        if(row_->tokens().size()-1>2)
+        if(row_->tokens().size()>3)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        if(row_->tokens().size()-1==2)
+        if(row_->tokens().size()==3)
             number_=to_number(row_->tokens().at(2).c_str());
         else number_=0;
     }
@@ -400,7 +400,7 @@ namespace atat
 
     LoopEndCommand::LoopEndCommand(const shared_ptr<Row>&row_):Command(row_)
     {
-        if(row_->tokens().size()-1!=1)
+        if(row_->tokens().size()!=2)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
     }
@@ -415,7 +415,7 @@ namespace atat
 
     SleepCommand::SleepCommand(const shared_ptr<Row>&row_):Command(row_)
     {
-        if(row_->tokens().size()-1!=1)
+        if(row_->tokens().size()!=2)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
         time_=to_number(row_->tokens().at(1).c_str());
