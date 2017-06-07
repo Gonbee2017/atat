@@ -54,135 +54,135 @@ namespace atat
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
         string key=row_->tokens().at(2);
-        static map<string,WORD> keyMap(
+        static const map<string,WORD> keyMap(
         {
-            {lower_case("ESCAPE"),      0x01},
-            {lower_case("1"),           0x02},
-            {lower_case("2"),           0x03},
-            {lower_case("3"),           0x04},
-            {lower_case("4"),           0x05},
-            {lower_case("5"),           0x06},
-            {lower_case("6"),           0x07},
-            {lower_case("7"),           0x08},
-            {lower_case("8"),           0x09},
-            {lower_case("9"),           0x0A},
-            {lower_case("0"),           0x0B},
-            {lower_case("MINUS"),       0x0C},
-            {lower_case("EQUALS"),      0x0D},
-            {lower_case("BACK"),        0x0E},
-            {lower_case("TAB"),         0x0F},
-            {lower_case("Q"),           0x10},
-            {lower_case("W"),           0x11},
-            {lower_case("E"),           0x12},
-            {lower_case("R"),           0x13},
-            {lower_case("T"),           0x14},
-            {lower_case("Y"),           0x15},
-            {lower_case("U"),           0x16},
-            {lower_case("I"),           0x17},
-            {lower_case("O"),           0x18},
-            {lower_case("P"),           0x19},
-            {lower_case("LBRACKET"),    0x1A},
-            {lower_case("RBRACKET"),    0x1B},
-            {lower_case("RETURN"),      0x1C},
-            {lower_case("LContol"),     0x1D},
-            {lower_case("A"),           0x1E},
-            {lower_case("S"),           0x1F},
-            {lower_case("D"),           0x20},
-            {lower_case("F"),           0x21},
-            {lower_case("G"),           0x22},
-            {lower_case("H"),           0x23},
-            {lower_case("J"),           0x24},
-            {lower_case("K"),           0x25},
-            {lower_case("L"),           0x26},
-            {lower_case("SEMICOLON"),   0x27},
-            {lower_case("APOSTROPHE"),  0x28},
-            {lower_case("GRAVE"),       0x29},
-            {lower_case("LSHIFT"),      0x2A},
-            {lower_case("BACKSLASH"),   0x2B},
-            {lower_case("Z"),           0x2C},
-            {lower_case("X"),           0x2D},
-            {lower_case("C"),           0x2E},
-            {lower_case("V"),           0x2F},
-            {lower_case("B"),           0x30},
-            {lower_case("N"),           0x31},
-            {lower_case("M"),           0x32},
-            {lower_case("COMMA"),       0x33},
-            {lower_case("PERIOD"),      0x34},
-            {lower_case("SLASH"),       0x35},
-            {lower_case("RSHIFT"),      0x36},
-            {lower_case("MULTIPLY"),    0x37},
-            {lower_case("LMENU"),       0x38},
-            {lower_case("SPACE"),       0x39},
-            {lower_case("CAPITAL"),     0x3A},
-            {lower_case("F1"),          0x3B},
-            {lower_case("F2"),          0x3C},
-            {lower_case("F3"),          0x3D},
-            {lower_case("F4"),          0x3E},
-            {lower_case("F5"),          0x3F},
-            {lower_case("F6"),          0x40},
-            {lower_case("F7"),          0x41},
-            {lower_case("F8"),          0x42},
-            {lower_case("F9"),          0x43},
-            {lower_case("F10"),         0x44},
-            {lower_case("NUMLOCK"),     0x45},
-            {lower_case("SCROLL"),      0x46},
-            {lower_case("NUMPAD7"),     0x47},
-            {lower_case("NUMPAD8"),     0x48},
-            {lower_case("NUMPAD9"),     0x49},
-            {lower_case("SUBTRACT"),    0x4A},
-            {lower_case("NUMPAD4"),     0x4B},
-            {lower_case("NUMPAD5"),     0x4C},
-            {lower_case("NUMPAD6"),     0x4D},
-            {lower_case("ADD"),         0x4E},
-            {lower_case("NUMPAD1"),     0x4F},
-            {lower_case("NUMPAD2"),     0x50},
-            {lower_case("NUMPAD3"),     0x51},
-            {lower_case("NUMPAD0"),     0x52},
-            {lower_case("DECIMAL"),     0x53},
-            {lower_case("F11"),         0x57},
-            {lower_case("F12"),         0x58},
-            {lower_case("F13"),         0x64},
-            {lower_case("F14"),         0x65},
-            {lower_case("F15"),         0x66},
-            {lower_case("KANA"),        0x70},
-            {lower_case("CONVERT"),     0x79},
-            {lower_case("NOCONVERT"),   0x7B},
-            {lower_case("YEN"),         0x7D},
-            {lower_case("NUMPADEQUALS"),0x8D},
-            {lower_case("CIRCUMFLEX"),  0x90},
-            {lower_case("AT"),          0x91},
-            {lower_case("COLON"),       0x92},
-            {lower_case("UNDERLINE"),   0x93},
-            {lower_case("KANJI"),       0x94},
-            {lower_case("STOP"),        0x95},
-            {lower_case("AX"),          0x96},
-            {lower_case("UNLABELED"),   0x97},
-            {lower_case("NUMPADENTER"), 0x9C},
-            {lower_case("RCONTROL"),    0x9D},
-            {lower_case("NUMPADCOMMA"), 0xB3},
-            {lower_case("DIVIDE"),      0xB5},
-            {lower_case("SYSRQ"),       0xB7},
-            {lower_case("RMENU"),       0xB8},
-            {lower_case("PAUSE"),       0xC5},
-            {lower_case("HOME"),        0xC7},
-            {lower_case("UP"),          0xC8},
-            {lower_case("PRIOR"),       0xC9},
-            {lower_case("LEFT"),        0xCB},
-            {lower_case("RIGHT"),       0xCD},
-            {lower_case("END"),         0xCF},
-            {lower_case("DOWN"),        0xD0},
-            {lower_case("NEXT"),        0xD1},
-            {lower_case("INSERT"),      0xD2},
-            {lower_case("DELETE"),      0xD3},
-            {lower_case("LWIN"),        0xDB},
-            {lower_case("RWIN"),        0xDC},
-            {lower_case("APPS"),        0xDD},
-            {lower_case("POWER"),       0xDE},
-            {lower_case("SLEEP"),       0xDF},
+            {to_lower_case("ESCAPE"),      0x01},
+            {to_lower_case("1"),           0x02},
+            {to_lower_case("2"),           0x03},
+            {to_lower_case("3"),           0x04},
+            {to_lower_case("4"),           0x05},
+            {to_lower_case("5"),           0x06},
+            {to_lower_case("6"),           0x07},
+            {to_lower_case("7"),           0x08},
+            {to_lower_case("8"),           0x09},
+            {to_lower_case("9"),           0x0A},
+            {to_lower_case("0"),           0x0B},
+            {to_lower_case("MINUS"),       0x0C},
+            {to_lower_case("EQUALS"),      0x0D},
+            {to_lower_case("BACK"),        0x0E},
+            {to_lower_case("TAB"),         0x0F},
+            {to_lower_case("Q"),           0x10},
+            {to_lower_case("W"),           0x11},
+            {to_lower_case("E"),           0x12},
+            {to_lower_case("R"),           0x13},
+            {to_lower_case("T"),           0x14},
+            {to_lower_case("Y"),           0x15},
+            {to_lower_case("U"),           0x16},
+            {to_lower_case("I"),           0x17},
+            {to_lower_case("O"),           0x18},
+            {to_lower_case("P"),           0x19},
+            {to_lower_case("LBRACKET"),    0x1A},
+            {to_lower_case("RBRACKET"),    0x1B},
+            {to_lower_case("RETURN"),      0x1C},
+            {to_lower_case("LContol"),     0x1D},
+            {to_lower_case("A"),           0x1E},
+            {to_lower_case("S"),           0x1F},
+            {to_lower_case("D"),           0x20},
+            {to_lower_case("F"),           0x21},
+            {to_lower_case("G"),           0x22},
+            {to_lower_case("H"),           0x23},
+            {to_lower_case("J"),           0x24},
+            {to_lower_case("K"),           0x25},
+            {to_lower_case("L"),           0x26},
+            {to_lower_case("SEMICOLON"),   0x27},
+            {to_lower_case("APOSTROPHE"),  0x28},
+            {to_lower_case("GRAVE"),       0x29},
+            {to_lower_case("LSHIFT"),      0x2A},
+            {to_lower_case("BACKSLASH"),   0x2B},
+            {to_lower_case("Z"),           0x2C},
+            {to_lower_case("X"),           0x2D},
+            {to_lower_case("C"),           0x2E},
+            {to_lower_case("V"),           0x2F},
+            {to_lower_case("B"),           0x30},
+            {to_lower_case("N"),           0x31},
+            {to_lower_case("M"),           0x32},
+            {to_lower_case("COMMA"),       0x33},
+            {to_lower_case("PERIOD"),      0x34},
+            {to_lower_case("SLASH"),       0x35},
+            {to_lower_case("RSHIFT"),      0x36},
+            {to_lower_case("MULTIPLY"),    0x37},
+            {to_lower_case("LMENU"),       0x38},
+            {to_lower_case("SPACE"),       0x39},
+            {to_lower_case("CAPITAL"),     0x3A},
+            {to_lower_case("F1"),          0x3B},
+            {to_lower_case("F2"),          0x3C},
+            {to_lower_case("F3"),          0x3D},
+            {to_lower_case("F4"),          0x3E},
+            {to_lower_case("F5"),          0x3F},
+            {to_lower_case("F6"),          0x40},
+            {to_lower_case("F7"),          0x41},
+            {to_lower_case("F8"),          0x42},
+            {to_lower_case("F9"),          0x43},
+            {to_lower_case("F10"),         0x44},
+            {to_lower_case("NUMLOCK"),     0x45},
+            {to_lower_case("SCROLL"),      0x46},
+            {to_lower_case("NUMPAD7"),     0x47},
+            {to_lower_case("NUMPAD8"),     0x48},
+            {to_lower_case("NUMPAD9"),     0x49},
+            {to_lower_case("SUBTRACT"),    0x4A},
+            {to_lower_case("NUMPAD4"),     0x4B},
+            {to_lower_case("NUMPAD5"),     0x4C},
+            {to_lower_case("NUMPAD6"),     0x4D},
+            {to_lower_case("ADD"),         0x4E},
+            {to_lower_case("NUMPAD1"),     0x4F},
+            {to_lower_case("NUMPAD2"),     0x50},
+            {to_lower_case("NUMPAD3"),     0x51},
+            {to_lower_case("NUMPAD0"),     0x52},
+            {to_lower_case("DECIMAL"),     0x53},
+            {to_lower_case("F11"),         0x57},
+            {to_lower_case("F12"),         0x58},
+            {to_lower_case("F13"),         0x64},
+            {to_lower_case("F14"),         0x65},
+            {to_lower_case("F15"),         0x66},
+            {to_lower_case("KANA"),        0x70},
+            {to_lower_case("CONVERT"),     0x79},
+            {to_lower_case("NOCONVERT"),   0x7B},
+            {to_lower_case("YEN"),         0x7D},
+            {to_lower_case("NUMPADEQUALS"),0x8D},
+            {to_lower_case("CIRCUMFLEX"),  0x90},
+            {to_lower_case("AT"),          0x91},
+            {to_lower_case("COLON"),       0x92},
+            {to_lower_case("UNDERLINE"),   0x93},
+            {to_lower_case("KANJI"),       0x94},
+            {to_lower_case("STOP"),        0x95},
+            {to_lower_case("AX"),          0x96},
+            {to_lower_case("UNLABELED"),   0x97},
+            {to_lower_case("NUMPADENTER"), 0x9C},
+            {to_lower_case("RCONTROL"),    0x9D},
+            {to_lower_case("NUMPADCOMMA"), 0xB3},
+            {to_lower_case("DIVIDE"),      0xB5},
+            {to_lower_case("SYSRQ"),       0xB7},
+            {to_lower_case("RMENU"),       0xB8},
+            {to_lower_case("PAUSE"),       0xC5},
+            {to_lower_case("HOME"),        0xC7},
+            {to_lower_case("UP"),          0xC8},
+            {to_lower_case("PRIOR"),       0xC9},
+            {to_lower_case("LEFT"),        0xCB},
+            {to_lower_case("RIGHT"),       0xCD},
+            {to_lower_case("END"),         0xCF},
+            {to_lower_case("DOWN"),        0xD0},
+            {to_lower_case("NEXT"),        0xD1},
+            {to_lower_case("INSERT"),      0xD2},
+            {to_lower_case("DELETE"),      0xD3},
+            {to_lower_case("LWIN"),        0xDB},
+            {to_lower_case("RWIN"),        0xDC},
+            {to_lower_case("APPS"),        0xDD},
+            {to_lower_case("POWER"),       0xDE},
+            {to_lower_case("SLEEP"),       0xDF},
         });
-        if(keyMap.find(lower_case(key))==keyMap.end())
+        if(keyMap.find(to_lower_case(key))==keyMap.end())
             throw runtime_error(describe("key:'",key,"':unknown"));
-        code_=keyMap.at(lower_case(key));
+        code_=keyMap.at(to_lower_case(key));
     }
 
     void KeyCommand::send(const WORD&code,const DWORD&up)
@@ -230,16 +230,37 @@ namespace atat
         ct().index++;
     }
 
-    Row::Row(const string&description_):description_(description_)
+    LoopBeginCommand::LoopBeginCommand(const shared_ptr<Row>&row_):
+        Command(row_)
     {
-        string::size_type pndpos=description_.find_first_of('#');
-        if(pndpos==string::npos) pndpos=description_.length();
-        tokens_=tokenize(description_.substr(0,pndpos)," \t");
+        if(row_->tokens().size()>3)
+            throw runtime_error(describe
+            ("row:'",row_->description(),"':wrong number of tokens"));
+        if(row_->tokens().size()==3)
+            number_=to_number(row_->tokens().at(2));
+        else number_=0;
     }
 
-    const string&Row::description() {return description_;}
+    void LoopBeginCommand::execute()
+    {
+        ct().index++;
+        frame_begin(number_);
+    }
 
-    const vector<string>&Row::tokens() {return tokens_;}
+    LoopEndCommand::LoopEndCommand(const shared_ptr<Row>&row_):Command(row_)
+    {
+        if(row_->tokens().size()!=2)
+            throw runtime_error(describe
+            ("row:'",row_->description(),"':wrong number of tokens"));
+    }
+
+    void LoopEndCommand::execute()
+    {
+        if(ct().frames.size()==1)
+            throw runtime_error(describe
+            ("loop end:no corresponding begin"));
+        if(!frame_end()) ct().index++;
+    }
 
     MouseButtonClickCommand::MouseButtonClickCommand
     (const shared_ptr<Row>&row_):MouseButtonCommand(row_) {}
@@ -262,8 +283,8 @@ namespace atat
         static const map<string,DWORD> buttonMap(
         {
             {"left",  MOUSEEVENTF_LEFTDOWN},
-            {"right", MOUSEEVENTF_RIGHTDOWN},
             {"middle",MOUSEEVENTF_MIDDLEDOWN},
+            {"right", MOUSEEVENTF_RIGHTDOWN},
         });
         button_=buttonMap.at(row_->tokens().at(1));
     }
@@ -330,8 +351,8 @@ namespace atat
         if(row_->tokens().size()!=4)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        x_=to_number(row_->tokens().at(2).c_str());
-        y_=to_number(row_->tokens().at(3).c_str());
+        x_=to_number(row_->tokens().at(2));
+        y_=to_number(row_->tokens().at(3));
     }
 
     void MouseMoveCommand::execute()
@@ -343,22 +364,17 @@ namespace atat
             if(ct().GetWindowRect(find_target(),&targetRect)==FALSE)
                 throw runtime_error(describe
                 (
-                    "function:'GetWindowRect':failed(",
-                    ct().GetLastError(),
-                    ")"
+                    "function:'GetWindowRect':"
+                    "failed(",ct().GetLastError(),")"
                 ));
         }
-        int screenWidth=ct().GetSystemMetrics(SM_CXSCREEN);
-        if(screenWidth==0)
-            throw runtime_error(describe
-            ("function:'GetSystemMetrics':failed"));
-        int screenHeight=ct().GetSystemMetrics(SM_CYSCREEN);
-        if(screenHeight==0)
-            throw runtime_error(describe
-            ("function:'GetSystemMetrics':failed"));
-        LONG mouseX=((x_+targetRect.left)<<16)/screenWidth;
-        LONG mouseY=((y_+targetRect.top)<<16)/screenHeight;
-        send(mouseX,mouseY,0,MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE);
+        send
+        (
+            ((x_+targetRect.left)<<16)/system_metrics(SM_CXSCREEN),
+            ((y_+targetRect.top)<<16)/system_metrics(SM_CYSCREEN),
+            0,
+            MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE
+        );
         ct().index++;
     }
 
@@ -368,7 +384,7 @@ namespace atat
         if(row_->tokens().size()!=3)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        amount_=to_number(row_->tokens().at(2).c_str());
+        amount_=to_number(row_->tokens().at(2));
     }
 
     void MouseWheelCommand::execute()
@@ -381,44 +397,23 @@ namespace atat
 
     void NullCommand::execute() {ct().index++;}
 
-    LoopBeginCommand::LoopBeginCommand(const shared_ptr<Row>&row_):
-        Command(row_)
+    Row::Row(const string&description_):description_(description_)
     {
-        if(row_->tokens().size()>3)
-            throw runtime_error(describe
-            ("row:'",row_->description(),"':wrong number of tokens"));
-        if(row_->tokens().size()==3)
-            number_=to_number(row_->tokens().at(2).c_str());
-        else number_=0;
+        string::size_type pndpos=description_.find_first_of('#');
+        if(pndpos==string::npos) pndpos=description_.length();
+        tokens_=tokenize(description_.substr(0,pndpos)," \t");
     }
 
-    void LoopBeginCommand::execute()
-    {
-        ct().index++;
-        frame_begin(number_);
-    }
+    const string&Row::description() {return description_;}
 
-    LoopEndCommand::LoopEndCommand(const shared_ptr<Row>&row_):Command(row_)
-    {
-        if(row_->tokens().size()!=2)
-            throw runtime_error(describe
-            ("row:'",row_->description(),"':wrong number of tokens"));
-    }
-
-    void LoopEndCommand::execute()
-    {
-        if(ct().frames.size()==1)
-            throw runtime_error(describe
-            ("loop end:no corresponding begin"));
-        if(!frame_end()) ct().index++;
-    }
+    const vector<string>&Row::tokens() {return tokens_;}
 
     SleepCommand::SleepCommand(const shared_ptr<Row>&row_):Command(row_)
     {
         if(row_->tokens().size()!=2)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        time_=to_number(row_->tokens().at(1).c_str());
+        time_=to_number(row_->tokens().at(1));
     }
 
     void SleepCommand::execute()
@@ -604,8 +599,6 @@ namespace atat
 
     HWND find_target()
     {
-        if(ct().properties.find("target")==ct().properties.end())
-            throw runtime_error(describe("property:'target':not found"));
         HWND window=ct().FindWindowW
         (NULL,multi_to_wide(ct().properties.at("target"),CP_UTF8).get());
         if(window==NULL)
@@ -619,66 +612,38 @@ namespace atat
 
     bool frame_end()
     {
-        bool return_=ct().frames.back().number==0||
+        bool continue_=ct().frames.back().number==0||
             ++ct().frames.back().counter<ct().frames.back().number;
-        if(return_) ct().index=ct().frames.back().entry;
+        if(continue_) ct().index=ct().frames.back().entry;
         else ct().frames.pop_back();
-        return return_;
+        return continue_;
     }
 
-    string lower_case(const string&source)
-    {
-        string destination;
-        destination.resize(source.size());
-        transform
-        (
-            source.begin(),
-            source.end(),
-            destination.begin(),
-            ::tolower
-        );
-        return destination;
-    }
-
-    shared_ptr<wchar_t> multi_to_wide(const string&str,const UINT&codePage)
+    shared_ptr<wchar_t> multi_to_wide
+    (const string&multi,const UINT&codePage)
     {
         int length=MultiByteToWideChar
-        (
-            codePage,
-            0,
-            str.c_str(),
-            str.size()+1,
-            NULL,
-            0
-        );
+        (codePage,0,multi.c_str(),multi.size()+1,NULL,0);
         if(length==0)
             throw runtime_error(describe
             (
-                "function:'MultiByteToWideChar':failed(",
-                ct().GetLastError(),
-                ")"
+                "function:'MultiByteToWideChar':"
+                "failed(",ct().GetLastError(),")"
             ));
-        shared_ptr<wchar_t> utf16
+        shared_ptr<wchar_t> wide
         (new wchar_t[length],default_delete<wchar_t[]>());
         if
         (
             MultiByteToWideChar
-            (
-                codePage,
-                0,
-                str.c_str(),
-                str.size()+1,
-                utf16.get(),
+            (codePage,0,multi.c_str(),multi.size()+1,wide.get(),length)!=
                 length
-            )!=length
         )
             throw runtime_error(describe
             (
-                "function:'MultiByteToWideChar':failed(",
-                ct().GetLastError(),
-                ")"
+                "function:'MultiByteToWideChar':"
+                "failed(",ct().GetLastError(),")"
             ));
-        return utf16;
+        return wide;
     }
 
     shared_ptr<Command> new_command
@@ -695,7 +660,7 @@ namespace atat
             if(row->tokens().size()<=index)
                 throw runtime_error(describe
                 ("row:'",row->description(),"':few switches"));
-            string switch_=lower_case(row->tokens().at(index));
+            string switch_=to_lower_case(row->tokens().at(index));
             if(factories.find(switch_)==factories.end())
                 throw runtime_error(describe
                 ("switch:'",switch_,"':unknown"));
@@ -715,7 +680,7 @@ namespace atat
             if(eqpos==string::npos) name=argument;
             else
             {
-                name=lower_case(argument.substr(0,eqpos));
+                name=to_lower_case(argument.substr(0,eqpos));
                 value=argument.substr(eqpos+1);
             }
             properties.insert(make_pair(name,value));
@@ -733,28 +698,18 @@ namespace atat
                 {return make_shared<KeyDownCommand>(row);}
             },
             {
-                "up",
-                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
-                {return make_shared<KeyUpCommand>(row);}
-            },
-            {
                 "press",
                 [] (const shared_ptr<Row>&row)->shared_ptr<Command>
                 {return make_shared<KeyPressCommand>(row);}
             },
-        });
-        static map<string,COMMAND_FACTORY> mouseButtonCommandFactories(
-        {
-            {
-                "down",
-                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
-                {return make_shared<MouseButtonDownCommand>(row);}
-            },
             {
                 "up",
                 [] (const shared_ptr<Row>&row)->shared_ptr<Command>
-                {return make_shared<MouseButtonUpCommand>(row);}
+                {return make_shared<KeyUpCommand>(row);}
             },
+        });
+        static map<string,COMMAND_FACTORY> mouseButtonCommandFactories(
+        {
             {
                 "click",
                 [] (const shared_ptr<Row>&row)->shared_ptr<Command>
@@ -765,26 +720,21 @@ namespace atat
                 [] (const shared_ptr<Row>&row)->shared_ptr<Command>
                 {return make_shared<MouseButtonDoubleClickCommand>(row);}
             },
+            {
+                "down",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseButtonDownCommand>(row);}
+            },
+            {
+                "up",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseButtonUpCommand>(row);}
+            },
         });
         static map<string,COMMAND_FACTORY> mouseCommandFactories(
         {
             {
-                "move",
-                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
-                {return make_shared<MouseMoveCommand>(row);}
-            },
-            {
-                "wheel",
-                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
-                {return make_shared<MouseWheelCommand>(row);}
-            },
-            {
                 "left",
-                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
-                {return new_command(mouseButtonCommandFactories,row,2);}
-            },
-            {
-                "right",
                 [] (const shared_ptr<Row>&row)->shared_ptr<Command>
                 {return new_command(mouseButtonCommandFactories,row,2);}
             },
@@ -792,6 +742,21 @@ namespace atat
                 "middle",
                 [] (const shared_ptr<Row>&row)->shared_ptr<Command>
                 {return new_command(mouseButtonCommandFactories,row,2);}
+            },
+            {
+                "move",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseMoveCommand>(row);}
+            },
+            {
+                "right",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(mouseButtonCommandFactories,row,2);}
+            },
+            {
+                "wheel",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return make_shared<MouseWheelCommand>(row);}
             },
         });
         static map<string,COMMAND_FACTORY> loopCommandFactories(
@@ -815,14 +780,14 @@ namespace atat
                 {return new_command(keyCommandFactories,row,1);}
             },
             {
-                "mouse",
-                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
-                {return new_command(mouseCommandFactories,row,1);}
-            },
-            {
                 "loop",
                 [] (const shared_ptr<Row>&row)->shared_ptr<Command>
                 {return new_command(loopCommandFactories,row,1);}
+            },
+            {
+                "mouse",
+                [] (const shared_ptr<Row>&row)->shared_ptr<Command>
+                {return new_command(mouseCommandFactories,row,1);}
             },
             {
                 "sleep",
@@ -843,9 +808,9 @@ namespace atat
 
     void run(const vector<shared_ptr<Command>>&commands)
     {
-        ct().index=0;
         if(ct().properties.find("ready")!=ct().properties.end())
              wait(to_number(ct().properties.at("ready")));
+        ct().index=0;
         size_t number=1;
         if(ct().properties.find("repeat")!=ct().properties.end())
              number=to_number(ct().properties.at("repeat"));
@@ -854,7 +819,11 @@ namespace atat
         {
             while(ct().index<commands.size())
             {
-                wait_active();
+                if(ct().properties.find("target")!=ct().properties.end())
+                {
+                    while(find_target()!=ct().GetForegroundWindow())
+                        wait(ct().GetDoubleClickTime());
+                }
                 auto command=commands.at(ct().index);
                 if(ct().properties.find("silent")==ct().properties.end())
                     (*ct().out)<<command->row()->description()<<endl;
@@ -869,26 +838,42 @@ namespace atat
         } while(frame_end());
     }
 
-    long to_number(const string&str)
+    int system_metrics(const int&index)
+    {
+        int result=ct().GetSystemMetrics(index);
+        if(result==0)
+            throw runtime_error(describe
+            ("function:'GetSystemMetrics':failed"));
+        return result;
+    }
+
+    string to_lower_case(const string&from)
+    {
+        string to;
+        to.resize(from.size());
+        transform(from.begin(),from.end(),to.begin(),::tolower);
+        return to;
+    }
+
+    long to_number(const string&from)
     {
         char*end;
-        long number=strtol(str.c_str(),&end,0);
+        long to=strtol(from.c_str(),&end,0);
         if(*end)
             throw runtime_error(describe
-            ("number:'",str.c_str(),"':invalid format"));
-        return number;
+            ("number:'",from,"':invalid format"));
+        return to;
     }
 
     vector<string> tokenize(const string&str,const string&delimiters)
     {
         vector<string> tokens;
-        for(string::size_type dlmpos=0;dlmpos<=str.length();)
+        for(string::size_type pos=0;pos<=str.length();)
         {
-            string::size_type found=str.find_first_of(delimiters,dlmpos);
-            if(found==string::npos) found=str.length();
-            if(found!=dlmpos)
-                tokens.push_back(str.substr(dlmpos,found-dlmpos));
-            dlmpos=found+1;
+            string::size_type dlmpos=str.find_first_of(delimiters,pos);
+            if(dlmpos==string::npos) dlmpos=str.length();
+            if(dlmpos!=pos) tokens.push_back(str.substr(pos,dlmpos-pos));
+            pos=dlmpos+1;
         }
         return tokens;
     }
@@ -900,19 +885,9 @@ namespace atat
         if(waitResult==WAIT_FAILED)
             throw runtime_error(describe
             (
-                "function:'WaitForSingleObject':failed(",
-                ct().GetLastError(),
-                ")"
+                "function:'WaitForSingleObject':"
+                "failed(",ct().GetLastError(),")"
             ));
         if(waitResult==WAIT_OBJECT_0) throw canceled_exception();
-    }
-
-    void wait_active()
-    {
-        if(ct().properties.find("target")!=ct().properties.end())
-        {
-            while(find_target()!=ct().GetForegroundWindow())
-                wait(ct().GetDoubleClickTime());
-        }
     }
 }

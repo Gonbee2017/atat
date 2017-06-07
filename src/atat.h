@@ -238,9 +238,8 @@ namespace atat
     HWND find_target();
     void frame_begin(const size_t&number);
     bool frame_end();
-    string lower_case(const string&source);
     shared_ptr<wchar_t> multi_to_wide
-    (const string&str,const UINT&codePage);
+    (const string&multi,const UINT&codePage);
     shared_ptr<Command> new_command
     (
         const map<string,COMMAND_FACTORY>&factories,
@@ -250,10 +249,11 @@ namespace atat
     map<string,string> parse_properties(int argc,char**argv);
     vector<shared_ptr<Command>> parse_script();
     void run(const vector<shared_ptr<Command>>&commands);
-    long to_number(const string&str);
+    int system_metrics(const int&index);
+    string to_lower_case(const string&from);
+    long to_number(const string&from);
     vector<string> tokenize(const string&str,const string&delimiters);
     void wait(const DWORD&time);
-    void wait_active();
 
     template<class... ARGUMENTS> string describe(ARGUMENTS&&...arguments)
     {return describe_with("",arguments...);}

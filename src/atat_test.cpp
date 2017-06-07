@@ -71,35 +71,12 @@ ostream&operator<<(ostream&os,const call&call_)
 void sand_box(function<void()> block)
 {
     block();
-
     ct().canceled_event.reset();
-    ct().err=nullptr;
-    ct().frames.clear();
-    ct().in=nullptr;
-    ct().index=0;
-    ct().out=nullptr;
-    ct().properties.clear();
-
-    ct().CloseHandle=nullptr;
-    ct().CreateEvent=nullptr;
-    ct().FindWindowW=nullptr;
-    ct().GetDoubleClickTime=nullptr;
-    ct().GetForegroundWindow=nullptr;
-    ct().GetLastError=nullptr;
-    ct().GetSystemMetrics=nullptr;
-    ct().GetWindowRect=nullptr;
-    ct().SendInput=nullptr;
-    ct().SetConsoleCtrlHandler=nullptr;
-    ct().SetEvent=nullptr;
-    ct().WaitForSingleObject=nullptr;
+    ct()=context();
 }
 
 template<class VALUE> SimpleString StringFrom(const VALUE&value)
-{
-    ostringstream oss;
-    oss<<value;
-    return oss.str().c_str();
-}
+{return describe(value).c_str();}
 
 TEST_GROUP(Command) {};
 
@@ -331,7 +308,7 @@ TEST(KeyCommand,construct)
         auto r=make_shared<Row>("key");
         try
         {
-            auto kdc=make_shared<KeyDownCommand>(r);
+            make_shared<KeyDownCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("row:'key':wrong number of tokens",e.what());}
@@ -341,7 +318,7 @@ TEST(KeyCommand,construct)
         auto r=make_shared<Row>("key down A B");
         try
         {
-            auto kdc=make_shared<KeyDownCommand>(r);
+            make_shared<KeyDownCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -354,7 +331,7 @@ TEST(KeyCommand,construct)
         auto r=make_shared<Row>("key down HOGE");
         try
         {
-            auto kdc=make_shared<KeyDownCommand>(r);
+            make_shared<KeyDownCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("key:'HOGE':unknown",e.what());}
@@ -363,21 +340,84 @@ TEST(KeyCommand,construct)
     {
         auto r=make_shared<Row>("key down A");
         auto kdc=make_shared<KeyDownCommand>(r);
+        POINTERS_EQUAL(r.get(),kdc->row());
     });
     sand_box([] ()
     {
         auto r=make_shared<Row>("key down  a\t");
         auto kdc=make_shared<KeyDownCommand>(r);
+        POINTERS_EQUAL(r.get(),kdc->row());
     });
     sand_box([] ()
     {
-        auto r=make_shared<Row>("key down B");
-        auto kdc=make_shared<KeyDownCommand>(r);
+        auto r=make_shared<Row>("key up B");
+        auto kuc=make_shared<KeyUpCommand>(r);
+        POINTERS_EQUAL(r.get(),kuc->row());
     });
 }
 
 TEST(KeyCommand,send)
 {
+    sand_box([] ()
+    {
+        history h;
+        ct().CreateEvent=
+            [&]
+            (
+                LPSECURITY_ATTRIBUTES lpEventAttributes,
+                BOOL bManualReset,
+                BOOL bInitialState,
+                LPCTSTR lpName
+            )->HANDLE {return (HANDLE)0x12;};
+        ct().CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
+        ct().SendInput=
+            [&] (UINT nInputs,LPINPUT pInputs,int cbSize)->UINT
+            {
+                h.calls().push_back(call
+                (
+                    "SendInput",
+                    nInputs,
+                    pInputs->type,
+                    pInputs->ki.wScan,
+                    pInputs->ki.dwFlags,
+                    pInputs->ki.time,
+                    pInputs->ki.dwExtraInfo,
+                    cbSize
+                ));
+                return 0;
+            };
+        ct().GetLastError=
+            [&] ()->DWORD
+            {
+                h.calls().push_back(call("GetLastError"));
+                return 34;
+            };
+        auto r=make_shared<Row>("key down A");
+        auto kdc=make_shared<KeyDownCommand>(r);
+        try
+        {
+            kdc->execute();
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("function:'SendInput':failed(34)",e.what());}
+        CHECK_EQUAL(2,h.calls().size());
+        CHECK_EQUAL
+        (
+            call
+            (
+                "SendInput",
+                1,
+                INPUT_KEYBOARD,
+                0x1E,
+                KEYEVENTF_SCANCODE,
+                0,
+                0,
+                sizeof(INPUT)*1
+            ),
+            h.calls().at(0)
+        );
+        CHECK_EQUAL(call("GetLastError"),h.calls().at(1));
+    });
     sand_box([] ()
     {
         history h;
@@ -757,6 +797,142 @@ TEST(KeyUpCommand,execute)
     });
 }
 
+TEST_GROUP(LoopBeginCommand) {};
+
+TEST(LoopBeginCommand,construct)
+{
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("loop begin 5 5");
+        try
+        {
+            make_shared<LoopBeginCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {
+            STRCMP_EQUAL
+            ("row:'loop begin 5 5':wrong number of tokens",e.what());
+        }
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("loop begin a");
+        try
+        {
+            make_shared<LoopBeginCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("number:'a':invalid format",e.what());}
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("loop begin");
+        auto lbc=make_shared<LoopBeginCommand>(r);
+        POINTERS_EQUAL(r.get(),lbc->row());
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("loop begin 5");
+        auto lbc=make_shared<LoopBeginCommand>(r);
+        POINTERS_EQUAL(r.get(),lbc->row());
+    });
+}
+
+TEST(LoopBeginCommand,execute)
+{
+    sand_box([] ()
+    {
+        ct().index=3;
+        auto r=make_shared<Row>("loop begin");
+        auto lbc=make_shared<LoopBeginCommand>(r);
+        lbc->execute();
+        CHECK_EQUAL(4,ct().index);
+        CHECK_EQUAL(1,ct().frames.size());
+        CHECK_EQUAL(0,ct().frames.back().counter);
+        CHECK_EQUAL(4,ct().frames.back().entry);
+        CHECK_EQUAL(0,ct().frames.back().number);
+    });
+    sand_box([] ()
+    {
+        ct().index=3;
+        auto r=make_shared<Row>("loop begin 5");
+        auto lbc=make_shared<LoopBeginCommand>(r);
+        lbc->execute();
+        CHECK_EQUAL(4,ct().index);
+        CHECK_EQUAL(1,ct().frames.size());
+        CHECK_EQUAL(0,ct().frames.back().counter);
+        CHECK_EQUAL(4,ct().frames.back().entry);
+        CHECK_EQUAL(5,ct().frames.back().number);
+    });
+}
+
+TEST_GROUP(LoopEndCommand) {};
+
+TEST(LoopEndCommand,construct)
+{
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("loop end end");
+        try
+        {
+            make_shared<LoopEndCommand>(r);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {
+            STRCMP_EQUAL
+            ("row:'loop end end':wrong number of tokens",e.what());
+        }
+    });
+    sand_box([] ()
+    {
+        auto r=make_shared<Row>("loop end");
+        auto lec=make_shared<LoopEndCommand>(r);
+        POINTERS_EQUAL(r.get(),lec->row());
+    });
+}
+
+TEST(LoopEndCommand,execute)
+{
+    sand_box([] ()
+    {
+        ct().frames.push_back({0,0,0});
+        ct().index=3;
+        auto r=make_shared<Row>("loop end");
+        auto lec=make_shared<LoopEndCommand>(r);
+        try
+        {
+            lec->execute();
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("loop end:no corresponding begin",e.what());}
+    });
+    sand_box([] ()
+    {
+        ct().frames.push_back({0,0,0});
+        ct().index=6;
+        ct().frames.push_back({3,4,5});
+        auto r=make_shared<Row>("loop end");
+        auto lec=make_shared<LoopEndCommand>(r);
+        lec->execute();
+        CHECK_EQUAL(4,ct().index);
+        CHECK_EQUAL(2,ct().frames.size());
+        CHECK_EQUAL(4,ct().frames.back().counter);
+        CHECK_EQUAL(4,ct().frames.back().entry);
+        CHECK_EQUAL(5,ct().frames.back().number);
+    });
+    sand_box([] ()
+    {
+        ct().frames.push_back({0,0,0});
+        ct().index=6;
+        ct().frames.push_back({4,4,5});
+        auto r=make_shared<Row>("loop end");
+        auto lec=make_shared<LoopEndCommand>(r);
+        lec->execute();
+        CHECK_EQUAL(7,ct().index);
+        CHECK_EQUAL(1,ct().frames.size());
+    });
+}
+
 TEST_GROUP(MouseButtonClickCommand) {};
 
 TEST(MouseButtonClickCommand,construct)
@@ -871,7 +1047,7 @@ TEST(MouseButtonCommand,construct)
         auto r=make_shared<Row>("mouse left down down");
         try
         {
-            auto mbdc=make_shared<MouseButtonDownCommand>(r);
+            make_shared<MouseButtonDownCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -886,11 +1062,13 @@ TEST(MouseButtonCommand,construct)
     {
         auto r=make_shared<Row>("mouse left down");
         auto mbdc=make_shared<MouseButtonDownCommand>(r);
+        POINTERS_EQUAL(r.get(),mbdc->row());
     });
     sand_box([] ()
     {
         auto r=make_shared<Row>("mouse right up");
         auto mbuc=make_shared<MouseButtonUpCommand>(r);
+        POINTERS_EQUAL(r.get(),mbuc->row());
     });
 }
 
@@ -1338,7 +1516,7 @@ TEST(MouseMoveCommand,construct)
         auto r=make_shared<Row>("mouse move");
         try
         {
-            auto mmc=make_shared<MouseMoveCommand>(r);
+            make_shared<MouseMoveCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -1351,7 +1529,7 @@ TEST(MouseMoveCommand,construct)
         auto r=make_shared<Row>("mouse move 100");
         try
         {
-            auto mmc=make_shared<MouseMoveCommand>(r);
+            make_shared<MouseMoveCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -1364,7 +1542,7 @@ TEST(MouseMoveCommand,construct)
         auto r=make_shared<Row>("mouse move 100 200 300");
         try
         {
-            auto mmc=make_shared<MouseMoveCommand>(r);
+            make_shared<MouseMoveCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -1380,7 +1558,7 @@ TEST(MouseMoveCommand,construct)
         auto r=make_shared<Row>("mouse move abc 200");
         try
         {
-            auto mmc=make_shared<MouseMoveCommand>(r);
+            make_shared<MouseMoveCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("number:'abc':invalid format",e.what());}
@@ -1390,7 +1568,7 @@ TEST(MouseMoveCommand,construct)
         auto r=make_shared<Row>("mouse move 100 def");
         try
         {
-            auto mmc=make_shared<MouseMoveCommand>(r);
+            make_shared<MouseMoveCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("number:'def':invalid format",e.what());}
@@ -1399,6 +1577,7 @@ TEST(MouseMoveCommand,construct)
     {
         auto r=make_shared<Row>("mouse move 100 200");
         auto mmc=make_shared<MouseMoveCommand>(r);
+        POINTERS_EQUAL(r.get(),mmc->row());
     });
 }
 
@@ -1422,7 +1601,7 @@ TEST(MouseMoveCommand,execute)
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("function:'GetSystemMetrics':failed",e.what());}
         CHECK_EQUAL(1,h.calls().size());
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(0));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(0));
     });
     sand_box([] ()
     {
@@ -1432,13 +1611,13 @@ TEST(MouseMoveCommand,execute)
             {
                 h.calls().push_back(call("GetSystemMetrics",nIndex));
                 int result;
-                switch(h.number_of("GetSystemMetrics"))
+                switch(nIndex)
                 {
-                case 1:
-                    result=400;
-                    break;
-                case 2:
+                case SM_CXSCREEN:
                     result=0;
+                    break;
+                case SM_CYSCREEN:
+                    result=300;
                     break;
                 default:
                     FAIL("Don't pass here.");
@@ -1454,8 +1633,8 @@ TEST(MouseMoveCommand,execute)
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("function:'GetSystemMetrics':failed",e.what());}
         CHECK_EQUAL(2,h.calls().size());
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(0));
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(1));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(0));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(1));
     });
     sand_box([] ()
     {
@@ -1465,12 +1644,12 @@ TEST(MouseMoveCommand,execute)
             {
                 h.calls().push_back(call("GetSystemMetrics",nIndex));
                 int result;
-                switch(h.number_of("GetSystemMetrics"))
+                switch(nIndex)
                 {
-                case 1:
+                case SM_CXSCREEN:
                     result=400;
                     break;
-                case 2:
+                case SM_CYSCREEN:
                     result=300;
                     break;
                 default:
@@ -1500,8 +1679,8 @@ TEST(MouseMoveCommand,execute)
         mmc->execute();
         CHECK_EQUAL(4,ct().index);
         CHECK_EQUAL(3,h.calls().size());
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(0));
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(1));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(0));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(1));
         CHECK_EQUAL
         (
             call
@@ -1578,12 +1757,12 @@ TEST(MouseMoveCommand,execute)
             {
                 h.calls().push_back(call("GetSystemMetrics",nIndex));
                 int result;
-                switch(h.number_of("GetSystemMetrics"))
+                switch(nIndex)
                 {
-                case 1:
+                case SM_CXSCREEN:
                     result=400;
                     break;
-                case 2:
+                case SM_CYSCREEN:
                     result=300;
                     break;
                 default:
@@ -1620,8 +1799,8 @@ TEST(MouseMoveCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetWindowRect",(HWND)0x56),h.calls().at(1));
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(2));
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(3));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(2));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(3));
         CHECK_EQUAL
         (
             call
@@ -1666,12 +1845,12 @@ TEST(MouseMoveCommand,execute)
             {
                 h.calls().push_back(call("GetSystemMetrics",nIndex));
                 int result;
-                switch(h.number_of("GetSystemMetrics"))
+                switch(nIndex)
                 {
-                case 1:
+                case SM_CXSCREEN:
                     result=400;
                     break;
-                case 2:
+                case SM_CYSCREEN:
                     result=300;
                     break;
                 default:
@@ -1708,8 +1887,8 @@ TEST(MouseMoveCommand,execute)
             h.calls().at(0)
         );
         CHECK_EQUAL(call("GetWindowRect",(HWND)0x56),h.calls().at(1));
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(2));
-        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(3));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CYSCREEN),h.calls().at(2));
+        CHECK_EQUAL(call("GetSystemMetrics",SM_CXSCREEN),h.calls().at(3));
         CHECK_EQUAL
         (
             call
@@ -1737,7 +1916,7 @@ TEST(MouseWheelCommand,construct)
         auto r=make_shared<Row>("mouse wheel");
         try
         {
-            auto mwc=make_shared<MouseWheelCommand>(r);
+            make_shared<MouseWheelCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -1750,7 +1929,7 @@ TEST(MouseWheelCommand,construct)
         auto r=make_shared<Row>("mouse wheel 10 20");
         try
         {
-            auto mwc=make_shared<MouseWheelCommand>(r);
+            make_shared<MouseWheelCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -1763,7 +1942,7 @@ TEST(MouseWheelCommand,construct)
         auto r=make_shared<Row>("mouse wheel ab");
         try
         {
-            auto mwc=make_shared<MouseWheelCommand>(r);
+            make_shared<MouseWheelCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("number:'ab':invalid format",e.what());}
@@ -1772,6 +1951,7 @@ TEST(MouseWheelCommand,construct)
     {
         auto r=make_shared<Row>("mouse wheel 10");
         auto mwc=make_shared<MouseWheelCommand>(r);
+        POINTERS_EQUAL(r.get(),mwc->row());
     });
 }
 
@@ -1861,136 +2041,27 @@ TEST(MouseWheelCommand,execute)
     });
 }
 
-TEST_GROUP(LoopBeginCommand) {};
+TEST_GROUP(NullCommand) {};
 
-TEST(LoopBeginCommand,construct)
+TEST(NullCommand,construct)
 {
     sand_box([] ()
     {
-        auto r=make_shared<Row>("loop begin 5 5");
-        try
-        {
-            auto lbc=make_shared<LoopBeginCommand>(r);
-            FAIL("Don't pass here.");
-        } catch(const runtime_error&e)
-        {
-            STRCMP_EQUAL
-            ("row:'loop begin 5 5':wrong number of tokens",e.what());
-        }
-    });
-    sand_box([] ()
-    {
-        auto r=make_shared<Row>("loop begin a");
-        try
-        {
-            auto lbc=make_shared<LoopBeginCommand>(r);
-            FAIL("Don't pass here.");
-        } catch(const runtime_error&e)
-        {STRCMP_EQUAL("number:'a':invalid format",e.what());}
-    });
-    sand_box([] ()
-    {
-        auto r=make_shared<Row>("loop begin");
-        auto lbc=make_shared<LoopBeginCommand>(r);
-    });
-    sand_box([] ()
-    {
-        auto r=make_shared<Row>("loop begin 5");
-        auto lbc=make_shared<LoopBeginCommand>(r);
+        auto r=make_shared<Row>("");
+        auto nc=make_shared<NullCommand>(r);
+        POINTERS_EQUAL(r.get(),nc->row());
     });
 }
 
-TEST(LoopBeginCommand,execute)
+TEST(NullCommand,execute)
 {
     sand_box([] ()
     {
         ct().index=3;
-        auto r=make_shared<Row>("loop begin");
-        auto lbc=make_shared<LoopBeginCommand>(r);
-        lbc->execute();
+        auto r=make_shared<Row>("");
+        auto nc=make_shared<NullCommand>(r);
+        nc->execute();
         CHECK_EQUAL(4,ct().index);
-        CHECK_EQUAL(1,ct().frames.size());
-        CHECK_EQUAL(0,ct().frames.back().counter);
-        CHECK_EQUAL(4,ct().frames.back().entry);
-        CHECK_EQUAL(0,ct().frames.back().number);
-    });
-    sand_box([] ()
-    {
-        ct().index=3;
-        auto r=make_shared<Row>("loop begin 5");
-        auto lbc=make_shared<LoopBeginCommand>(r);
-        lbc->execute();
-        CHECK_EQUAL(4,ct().index);
-        CHECK_EQUAL(1,ct().frames.size());
-        CHECK_EQUAL(0,ct().frames.back().counter);
-        CHECK_EQUAL(4,ct().frames.back().entry);
-        CHECK_EQUAL(5,ct().frames.back().number);
-    });
-}
-
-TEST_GROUP(LoopEndCommand) {};
-
-TEST(LoopEndCommand,construct)
-{
-    sand_box([] ()
-    {
-        auto r=make_shared<Row>("loop end end");
-        try
-        {
-            auto lec=make_shared<LoopEndCommand>(r);
-            FAIL("Don't pass here.");
-        } catch(const runtime_error&e)
-        {
-            STRCMP_EQUAL
-            ("row:'loop end end':wrong number of tokens",e.what());
-        }
-    });
-    sand_box([] ()
-    {
-        auto r=make_shared<Row>("loop end");
-        auto lec=make_shared<LoopEndCommand>(r);
-    });
-}
-
-TEST(LoopEndCommand,execute)
-{
-    sand_box([] ()
-    {
-        ct().frames.push_back({0,0,0});
-        ct().index=3;
-        auto r=make_shared<Row>("loop end");
-        auto lec=make_shared<LoopEndCommand>(r);
-        try
-        {
-            lec->execute();
-            FAIL("Don't pass here.");
-        } catch(const runtime_error&e)
-        {STRCMP_EQUAL("loop end:no corresponding begin",e.what());}
-    });
-    sand_box([] ()
-    {
-        ct().frames.push_back({0,0,0});
-        ct().index=6;
-        ct().frames.push_back({3,4,5});
-        auto r=make_shared<Row>("loop end");
-        auto lec=make_shared<LoopEndCommand>(r);
-        lec->execute();
-        CHECK_EQUAL(4,ct().index);
-        CHECK_EQUAL(2,ct().frames.size());
-        CHECK_EQUAL(4,ct().frames.back().counter);
-        CHECK_EQUAL(4,ct().frames.back().entry);
-        CHECK_EQUAL(5,ct().frames.back().number);
-    });
-    sand_box([] ()
-    {
-        ct().frames.push_back({0,0,0});
-        ct().index=6;
-        ct().frames.push_back({4,4,5});
-        auto r=make_shared<Row>("loop end");
-        auto lec=make_shared<LoopEndCommand>(r);
-        lec->execute();
-        CHECK_EQUAL(7,ct().index);
-        CHECK_EQUAL(1,ct().frames.size());
     });
 }
 
@@ -2024,7 +2095,7 @@ TEST(SleepCommand,construct)
         auto r=make_shared<Row>("sleep");
         try
         {
-            auto sc=make_shared<SleepCommand>(r);
+            make_shared<SleepCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -2037,7 +2108,7 @@ TEST(SleepCommand,construct)
         auto r=make_shared<Row>("sleep 1000 2000");
         try
         {
-            auto sc=make_shared<SleepCommand>(r);
+            make_shared<SleepCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {
@@ -2050,7 +2121,7 @@ TEST(SleepCommand,construct)
         auto r=make_shared<Row>("sleep abcd");
         try
         {
-            auto sc=make_shared<SleepCommand>(r);
+            make_shared<SleepCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
         {STRCMP_EQUAL("number:'abcd':invalid format",e.what());}
@@ -2059,6 +2130,7 @@ TEST(SleepCommand,construct)
     {
         auto r=make_shared<Row>("sleep 1000");
         auto sc=make_shared<SleepCommand>(r);
+        POINTERS_EQUAL(r.get(),sc->row());
     });
 }
 
@@ -2108,6 +2180,7 @@ TEST(free,chomp_cr)
         CHECK_EQUAL("",chomp_cr(""));
         CHECK_EQUAL("abc",chomp_cr("abc"));
         CHECK_EQUAL("abc\n",chomp_cr("abc\n"));
+        CHECK_EQUAL("ab\rc",chomp_cr("ab\rc"));
         CHECK_EQUAL("abc",chomp_cr("abc\r"));
     });
 }
@@ -2351,15 +2424,6 @@ TEST(free,find_target)
 {
     sand_box([] ()
     {
-        try
-        {
-            find_target();
-            FAILED("Don't pass here.");
-        } catch(const runtime_error&e)
-        {STRCMP_EQUAL("property:'target':not found",e.what());}
-    });
-    sand_box([] ()
-    {
         history h;
         ct().FindWindowW=
             [&]
@@ -2470,16 +2534,6 @@ TEST(free,frame_end)
         CHECK_FALSE(frame_end());
         CHECK_EQUAL(6,ct().index);
         CHECK(ct().frames.empty());
-    });
-}
-
-TEST(free,lower_case)
-{
-    sand_box([] ()
-    {
-        CHECK_EQUAL("abc",lower_case("ABC"));
-        CHECK_EQUAL("def",lower_case("def"));
-        CHECK_EQUAL("123",lower_case("123"));
     });
 }
 
@@ -3003,6 +3057,51 @@ TEST(free,run)
     });
 }
 
+TEST(free,system_metrics)
+{
+    sand_box([] ()
+    {
+        history h;
+        ct().GetSystemMetrics=
+            [&] (int nIndex)->int
+            {
+                h.calls().push_back(call("GetSystemMetrics",nIndex));
+                return 0;
+            };
+        try
+        {
+            system_metrics(12);
+            FAIL("Don't pass here.");
+        } catch(const runtime_error&e)
+        {STRCMP_EQUAL("function:'GetSystemMetrics':failed",e.what());}
+        CHECK_EQUAL(1,h.calls().size());
+        CHECK_EQUAL(call("GetSystemMetrics",12),h.calls().at(0));
+    });
+    sand_box([] ()
+    {
+        history h;
+        ct().GetSystemMetrics=
+            [&] (int nIndex)->int
+            {
+                h.calls().push_back(call("GetSystemMetrics",nIndex));
+                return 56;
+            };
+        CHECK_EQUAL(56,system_metrics(34));
+        CHECK_EQUAL(1,h.calls().size());
+        CHECK_EQUAL(call("GetSystemMetrics",34),h.calls().at(0));
+    });
+}
+
+TEST(free,to_lower_case)
+{
+    sand_box([] ()
+    {
+        CHECK_EQUAL("abc",to_lower_case("ABC"));
+        CHECK_EQUAL("def",to_lower_case("def"));
+        CHECK_EQUAL("123",to_lower_case("123"));
+    });
+}
+
 TEST(free,to_number)
 {
     sand_box([] ()
@@ -3183,101 +3282,5 @@ TEST(free,wait)
         CHECK_EQUAL(1,h.calls().size());
         CHECK_EQUAL
         (call("WaitForSingleObject",(HANDLE)0x12,3000),h.calls().at(0));
-    });
-}
-
-TEST(free,wait_active)
-{
-    sand_box([] ()
-    {
-        ct().CreateEvent=
-            [&]
-            (
-                LPSECURITY_ATTRIBUTES lpEventAttributes,
-                BOOL bManualReset,
-                BOOL bInitialState,
-                LPCTSTR lpName
-            )->HANDLE {return (HANDLE)0x12;};
-        ct().CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
-        wait_active();
-    });
-    sand_box([] ()
-    {
-        history h;
-        ct().CreateEvent=
-            [&]
-            (
-                LPSECURITY_ATTRIBUTES lpEventAttributes,
-                BOOL bManualReset,
-                BOOL bInitialState,
-                LPCTSTR lpName
-            )->HANDLE {return (HANDLE)0x12;};
-        ct().CloseHandle=[&] (HANDLE hObject)->BOOL {return TRUE;};
-        ct().FindWindowW=
-            [&]
-            (const wchar_t*lpClassName,const wchar_t*lpWindowName)->HWND
-            {
-                h.calls().push_back(call
-                (
-                    "FindWindowW",
-                    (const char*)lpClassName,
-                    (const char*)lpWindowName
-                ));
-                return (HWND)0x56;
-            };
-        ct().GetForegroundWindow=
-            [&] ()->HWND
-            {
-                h.calls().push_back(call("GetForegroundWindow"));
-                HWND w;
-                switch(h.number_of("GetForegroundWindow"))
-                {
-                case 1:
-                    w=(HWND)0x78;
-                    break;
-                case 2:
-                    w=(HWND)0x56;
-                    break;
-                default:
-                    FAIL("Don't pass here.");
-                };
-                return w;
-            };
-        ct().GetDoubleClickTime=
-            [&] ()->UINT
-            {
-                h.calls().push_back(call("GetDoubleClickTime"));
-                return 100;
-            };
-        ct().WaitForSingleObject=
-            [&] (HANDLE hHandle,DWORD dwMilliseconds)->DWORD
-            {
-                h.calls().push_back(call
-                (
-                    "WaitForSingleObject",
-                    hHandle,
-                    dwMilliseconds
-                ));
-                return WAIT_TIMEOUT;
-            };
-        ct().canceled_event=make_shared<Event>();
-        ct().properties.insert(make_pair("target","電卓"));
-        wait_active();
-        CHECK_EQUAL(6,h.calls().size());
-        CHECK_EQUAL
-        (
-            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
-            h.calls().at(0)
-        );
-        CHECK_EQUAL(call("GetForegroundWindow"),h.calls().at(1));
-        CHECK_EQUAL(call("GetDoubleClickTime"),h.calls().at(2));
-        CHECK_EQUAL
-        (call("WaitForSingleObject",(HANDLE)0x12,100),h.calls().at(3));
-        CHECK_EQUAL
-        (
-            call("FindWindowW",(const char*)NULL,(const char*)L"電卓"),
-            h.calls().at(4)
-        );
-        CHECK_EQUAL(call("GetForegroundWindow"),h.calls().at(5));
     });
 }
