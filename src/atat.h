@@ -216,6 +216,7 @@ namespace atat
     using COMMAND_FACTORY=
         function<shared_ptr<Command>(const shared_ptr<Row>&row)>;
 
+    string chomp_cr(const string&str);
     BOOL control_key_pressed(DWORD type);
     context&ct();
     template<class...ARGUMENTS> string describe(ARGUMENTS&&...arguments);
@@ -283,9 +284,9 @@ namespace atat
     template<class...ARGUMENTS> string describe_with
     (const string&delimiter,ARGUMENTS&&...arguments)
     {
-        ostringstream os;
-        describe_to_with(os,delimiter,arguments...);
-        return os.str();
+        ostringstream oss;
+        describe_to_with(oss,delimiter,arguments...);
+        return oss.str();
     }
 }
 

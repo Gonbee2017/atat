@@ -427,6 +427,14 @@ namespace atat
         ct().index++;
     }
 
+    string chomp_cr(const string&str)
+    {
+        string result=str;
+        if(!str.empty()&&str.back()=='\r')
+            result=str.substr(0,str.length()-1);
+        return result;
+    }
+
     BOOL control_key_pressed(DWORD type)
     {
         BOOL handled=FALSE;
@@ -826,6 +834,7 @@ namespace atat
         string description;
         for(ct().index=0;getline(*ct().in,description);ct().index++)
         {
+            description=chomp_cr(description);
             auto row=make_shared<Row>(description);
             commands.push_back(new_command(commandFactories,row,0));
         }

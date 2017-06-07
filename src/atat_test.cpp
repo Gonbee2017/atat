@@ -2101,6 +2101,17 @@ TEST(SleepCommand,execute)
 
 TEST_GROUP(free) {};
 
+TEST(free,chomp_cr)
+{
+    sand_box([] ()
+    {
+        CHECK_EQUAL("",chomp_cr(""));
+        CHECK_EQUAL("abc",chomp_cr("abc"));
+        CHECK_EQUAL("abc\n",chomp_cr("abc\n"));
+        CHECK_EQUAL("abc",chomp_cr("abc\r"));
+    });
+}
+
 TEST(free,control_key_pressed)
 {
     sand_box([] ()
@@ -2656,10 +2667,11 @@ TEST(free,parse_script)
             "loop end\n"
             "sleep 1000\n"
             " \n"
+            " \r\n"
         );
         ct().in=&in;
         auto cs=parse_script();
-        CHECK_EQUAL(19,cs.size());
+        CHECK_EQUAL(20,cs.size());
         CHECK(dynamic_cast<KeyDownCommand*>(cs.at(0).get()));
         CHECK(dynamic_cast<KeyUpCommand*>(cs.at(1).get()));
         CHECK(dynamic_cast<KeyPressCommand*>(cs.at(2).get()));
@@ -2682,7 +2694,8 @@ TEST(free,parse_script)
         CHECK(dynamic_cast<LoopEndCommand*>(cs.at(16).get()));
         CHECK(dynamic_cast<SleepCommand*>(cs.at(17).get()));
         CHECK(dynamic_cast<NullCommand*>(cs.at(18).get()));
-        CHECK_EQUAL(19,ct().index);
+        CHECK(dynamic_cast<NullCommand*>(cs.at(19).get()));
+        CHECK_EQUAL(20,ct().index);
     });
 }
 
