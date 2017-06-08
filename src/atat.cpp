@@ -53,7 +53,7 @@ namespace atat
         if(row_->tokens().size()!=3)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        string key=row_->tokens().at(2);
+        string key=to_lower_case(row_->tokens().at(2));
         static const map<string,WORD> keyMap(
         {
             {to_lower_case("ESCAPE"),      0x01},
@@ -180,9 +180,9 @@ namespace atat
             {to_lower_case("POWER"),       0xDE},
             {to_lower_case("SLEEP"),       0xDF},
         });
-        if(keyMap.find(to_lower_case(key))==keyMap.end())
+        if(keyMap.find(key)==keyMap.end())
             throw runtime_error(describe("key:'",key,"':unknown"));
-        code_=keyMap.at(to_lower_case(key));
+        code_=keyMap.at(key);
     }
 
     void KeyCommand::send(const WORD&code,const DWORD&up)
@@ -799,8 +799,7 @@ namespace atat
         string description;
         for(ct().index=0;getline(*ct().in,description);ct().index++)
         {
-            description=chomp_cr(description);
-            auto row=make_shared<Row>(description);
+            auto row=make_shared<Row>(chomp_cr(description));
             commands.push_back(new_command(commandFactories,row,0));
         }
         return commands;
@@ -811,10 +810,10 @@ namespace atat
         if(ct().properties.find("ready")!=ct().properties.end())
              wait(to_number(ct().properties.at("ready")));
         ct().index=0;
-        size_t number=1;
+        size_t numberOfRepetities=1;
         if(ct().properties.find("repeat")!=ct().properties.end())
-             number=to_number(ct().properties.at("repeat"));
-        frame_begin(number);
+             numberOfRepetities=to_number(ct().properties.at("repeat"));
+        frame_begin(numberOfRepetities);
         do
         {
             while(ct().index<commands.size())
@@ -880,14 +879,14 @@ namespace atat
 
     void wait(const DWORD&time)
     {
-        DWORD waitResult=ct().WaitForSingleObject
+        DWORD resultOfW4SO=ct().WaitForSingleObject
         (ct().canceled_event->handle(),time);
-        if(waitResult==WAIT_FAILED)
+        if(resultOfW4SO==WAIT_FAILED)
             throw runtime_error(describe
             (
                 "function:'WaitForSingleObject':"
                 "failed(",ct().GetLastError(),")"
             ));
-        if(waitResult==WAIT_OBJECT_0) throw canceled_exception();
+        if(resultOfW4SO==WAIT_OBJECT_0) throw canceled_exception();
     }
 }

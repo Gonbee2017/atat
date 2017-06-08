@@ -334,7 +334,7 @@ TEST(KeyCommand,construct)
             make_shared<KeyDownCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
-        {STRCMP_EQUAL("key:'HOGE':unknown",e.what());}
+        {STRCMP_EQUAL("key:'hoge':unknown",e.what());}
     });
     sand_box([] ()
     {
