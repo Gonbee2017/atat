@@ -334,7 +334,7 @@ TEST(KeyCommand,construct)
             make_shared<KeyDownCommand>(r);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
-        {STRCMP_EQUAL("key:'hoge':unknown",e.what());}
+        {STRCMP_EQUAL("key:'HOGE':unknown",e.what());}
     });
     sand_box([] ()
     {
@@ -2612,13 +2612,13 @@ TEST(free,new_command)
                 {return make_shared<KeyUpCommand>(row);}
             },
         });
-        auto r=make_shared<Row>("key press A");
+        auto r=make_shared<Row>("key PReSS A");
         try
         {
             auto c=new_command(fs,r,1);
             FAIL("Don't pass here.");
         } catch(const runtime_error&e)
-        {STRCMP_EQUAL("switch:'press':unknown",e.what());}
+        {STRCMP_EQUAL("switch:'PReSS':unknown",e.what());}
     });
     sand_box([] ()
     {

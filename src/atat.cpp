@@ -53,7 +53,8 @@ namespace atat
         if(row_->tokens().size()!=3)
             throw runtime_error(describe
             ("row:'",row_->description(),"':wrong number of tokens"));
-        string key=to_lower_case(row_->tokens().at(2));
+        string key=row_->tokens().at(2);
+        string keyAsLC=to_lower_case(key);
         static const map<string,WORD> keyMap(
         {
             {to_lower_case("ESCAPE"),      0x01},
@@ -180,9 +181,9 @@ namespace atat
             {to_lower_case("POWER"),       0xDE},
             {to_lower_case("SLEEP"),       0xDF},
         });
-        if(keyMap.find(key)==keyMap.end())
+        if(keyMap.find(keyAsLC)==keyMap.end())
             throw runtime_error(describe("key:'",key,"':unknown"));
-        code_=keyMap.at(key);
+        code_=keyMap.at(keyAsLC);
     }
 
     void KeyCommand::send(const WORD&code,const DWORD&up)
@@ -660,11 +661,12 @@ namespace atat
             if(row->tokens().size()<=index)
                 throw runtime_error(describe
                 ("row:'",row->description(),"':few switches"));
-            string switch_=to_lower_case(row->tokens().at(index));
-            if(factories.find(switch_)==factories.end())
+            string switch_=row->tokens().at(index);
+            string switchAsLC=to_lower_case(switch_);
+            if(factories.find(switchAsLC)==factories.end())
                 throw runtime_error(describe
                 ("switch:'",switch_,"':unknown"));
-            command=factories.at(switch_)(row);
+            command=factories.at(switchAsLC)(row);
         }
         return command;
     }
